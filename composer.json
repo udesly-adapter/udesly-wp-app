@@ -1,0 +1,27 @@
+{
+  "name": "eclipsesrl/udesly-wp-app",
+  "description": "Udesly Companion Plugin",
+  "license": "proprietary",
+  "require": {
+    "ext-json": "*",
+    "wpackagist-plugin/advanced-custom-fields": "^5.9"
+  },
+  "repositories":[
+    {
+      "type": "composer",
+      "url": "https://wpackagist.org"
+    }
+  ],
+  "extra": {
+    "installer-paths": {
+      "vendor/{$name}/": [
+        "type:wordpress-plugin"
+      ]
+    }
+  },
+  "autoload": {
+    "psr-4": {
+      "Udesly\\": "src"
+    }
+  }
+}
