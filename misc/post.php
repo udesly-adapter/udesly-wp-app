@@ -105,9 +105,9 @@ if (!function_exists('udesly_define_taxonomy')) {
 		$args = wp_parse_args($args, [
 			'public' => true,
 			'has_archive' => true,
-			'show_in_rest' => false,
+			'show_in_rest' => true,
 			'rest_base' => "taxonomy/$taxonomy",
-			'show_admin_column' => false,
+			'show_admin_column' => true,
 			'supports' => ['author', 'excerpt', 'thumbnails', 'title'],
 		]);
 

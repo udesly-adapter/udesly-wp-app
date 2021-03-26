@@ -34,6 +34,7 @@ var Notyf=function(){"use strict";var n,t,o=function(){return(o=Object.assign||f
         fire_import();
     }
 
+    var showedComplete = false;
 
     $( document ).on( 'heartbeat-send', function ( event, data ) {
         // Add additional data to Heartbeat data.
@@ -50,18 +51,21 @@ var Notyf=function(){"use strict";var n,t,o=function(){return(o=Object.assign||f
         fire_import();
     });
 
+
+
     function fire_import() {
 
         if (!udesly_theme_admin.import_data.has_next) {
             if (notification) {
                 notyf.dismiss(notification);
             }
-            if (udesly_theme_admin.import_data.status === "complete") {
+            if (udesly_theme_admin.import_data.status === "complete" && !showedComplete) {
                 notyf.success({
                     message: "Data imported successfully!",
                     dismissible: true,
                     duration: 10000
                 })
+                showedComplete = true;
                 importing = false;
             }
             importing = false;

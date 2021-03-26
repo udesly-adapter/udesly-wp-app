@@ -371,6 +371,17 @@ final class DBUtils {
 				}
 			}
 
+			if ( property_exists($post, 'post_category')) {
+			    $categories = [];
+			    foreach ($post->post_category as $category_slug) {
+			        $cat = get_category_by_slug($category_slug);
+			        if ($cat) {
+			            $categories[] = $cat->term_id;
+                    }
+                }
+			    $post->post_category = $categories;
+            }
+
 			$post_id = wp_insert_post( (array) $post );
 
 			if ( is_wp_error( $post_id ) ) {
