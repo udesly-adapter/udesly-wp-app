@@ -276,7 +276,7 @@ final class DBUtils {
 	}
 
 	static function create_term_if_necessary( \stdClass $term ): ?int {
-		$term    = sanitize_term( $term, $term->taxonomy );
+		$term    = (object) sanitize_term( (array) $term, $term->taxonomy );
 		$wp_term = DBUtils::get_term_by_slug( $term->slug, $term->taxonomy );
 		if ( $wp_term ) {
 			return $wp_term->term_id;

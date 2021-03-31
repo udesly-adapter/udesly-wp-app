@@ -121,4 +121,31 @@ if (!function_exists('udesly_define_taxonomy')) {
 
 	}
 }
+if (!function_exists('udesly_get_the_terms')) {
 
+
+	function udesly_get_the_terms($taxonomy, $limit = -1) {
+		global $post;
+
+		$terms = get_the_terms($post, $taxonomy);
+		if (!$terms) {
+			return [];
+		}
+		if ($limit < 1) {
+			return $terms;
+		}
+		return array_slice($terms, 0, $limit);
+	}
+
+}
+
+if (!function_exists('udesly_get_the_term')) {
+
+	function udesly_get_the_term($taxonomy) {
+		$terms = udesly_get_the_terms($taxonomy);
+		if (isset($terms[0])) {
+			return $terms[0];
+		}
+		return false;
+	}
+}

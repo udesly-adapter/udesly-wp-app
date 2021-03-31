@@ -270,13 +270,3 @@ if ( ! function_exists( 'udesly_custom_field_set' ) ) {
 	}
 
 }
-
-
-if ( ! function_exists( 'udesly_boot_custom_fields' ) ) {
-
-	function udesly_boot_custom_fields() {
-
-		//Carbon_Fields::boot();
-
-	}
-}
