@@ -80,8 +80,7 @@ final class DBUtils {
 				}
 				return null;
 			case "Video":
-				dd($value);
-				return $value->url ?? "";
+				return $value->url;
 			case "FileRef":
 				$result = self::upload_from_url($value->url);
 				if (isset($result['attachment_id'])) {

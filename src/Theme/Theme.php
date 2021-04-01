@@ -199,9 +199,13 @@ final class Theme {
 	}
 
 	public function delete_last_import_transient() {
-		delete_transient( '_udesly_last_data_import' );
-		delete_transient('_udesly_last_data_file_size');
-		delete_transient('_udesly_last_file_hash');
+		$stats = $this->get_background_import_status();
+		if ($stats['status'] === "idle") {
+			delete_transient( '_udesly_last_data_import' );
+			delete_transient('_udesly_last_data_file_size');
+			delete_transient('_udesly_last_file_hash');
+		}
+
 	}
 
 	public function set_last_import_time() {

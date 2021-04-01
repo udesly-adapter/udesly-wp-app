@@ -287,7 +287,7 @@ if (!function_exists('__udesly_get_field')) {
 			return $cache;
 		}
 
-		$field = get_field( $slug, $id );
+		$field = get_field( $slug, $id, false );
 
 		$value = __udesly_prepare_field( $field_type, $field );
 
