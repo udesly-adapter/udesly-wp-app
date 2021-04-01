@@ -12,7 +12,7 @@ if ( ! function_exists( 'udesly_register_custom_fields_for_post_type' ) ) {
 
 
 		acf_add_local_field_group( [
-			"key"      => "udesly_group_${post_type}",
+			"key"      => "udesly_group_$post_type",
 			"title"    => __( "Collection Fields" ),
 			"fields"   => $fields,
 			'location' => [
@@ -37,7 +37,7 @@ if ( ! function_exists( 'udesly_register_custom_fields_for_taxonomy' ) ) {
 
 
 		acf_add_local_field_group( [
-			"key"      => "udesly_group_${$taxonomy}",
+			"key"      => "udesly_group_$taxonomy",
 			"title"    => __( "Taxonomy Fields" ),
 			"fields"   => $fields,
 			"location" => [
@@ -191,35 +191,7 @@ if ( ! function_exists( 'udesly_custom_field_video' ) ) {
 
 	function udesly_custom_field_video( array $args ): array {
 
-		$args = wp_parse_args( $args, [
-			"sub_fields" => [
-				[
-					"key"           => "field_" . $args["name"] . "_mp4",
-					"return_format" => "url",
-					"name"          => "mp4",
-					"label"         => "MP4",
-					"mime_types"    => "mp4",
-					"type"          => "file"
-				],
-				[
-					"key"           => "field_" . $args["name"] . "_webm",
-					"return_format" => "url",
-					"mime_types"    => "webm",
-					"name"          => "webm",
-					"label"         => "WebM",
-					"type"          => "file"
-				],
-				[
-					"key"           => "field_" . $args["name"] . "_poster",
-					"return_format" => "url",
-					"name"          => "poster",
-					"label"         => "Poster",
-					"type"          => "image"
-				]
-			]
-		] );
-
-		return udesly_custom_field_generics( $args, "group" );
+		return udesly_custom_field_generics( $args, "oembed" );
 
 	}
 }
@@ -267,6 +239,86 @@ if ( ! function_exists( 'udesly_custom_field_set' ) ) {
 		] );
 
 		return udesly_custom_field_generics( $args, "gallery" );
+	}
+
+}
+
+if (!function_exists( '__udesly_prepare_field')) {
+
+	function __udesly_prepare_field( string $field_type, $field_value )  {
+		switch ($field_type) {
+			case "ImageRef":
+				return udesly_get_image([
+					"id" => $field_value
+				]);
+			default:
+				return $field_value;
+		}
+	}
+
+}
+
+if (!function_exists('udesly_check_cache')) {
+
+	function udesly_check_cache( $key ) {
+		return wp_cache_get($key, 'udesly_cache');
+	}
+}
+
+if (!function_exists('udesly_set_cache')) {
+
+	function udesly_set_cache ($key, $value) {
+		return wp_cache_set($key, $value, 'udesly_cache');
+	}
+}
+
+if (!function_exists('__udesly_get_field')) {
+
+	function __udesly_get_field($id, $slug, $field_type, $object_prefix = "") {
+
+		if ($object_prefix !== "") {
+			$id = $object_prefix . $id;
+		}
+
+		$key = $id . $slug . $field_type;
+
+		$cache = udesly_check_cache( $key );
+		if ($cache){
+			return $cache;
+		}
+
+		$field = get_field( $slug, $id );
+
+		$value = __udesly_prepare_field( $field_type, $field );
+
+		udesly_set_cache($key, $value);
+
+		return $value;
+
+	}
+
+}
+
+if (!function_exists('udesly_get_custom_author_field')) {
+
+	function udesly_get_custom_author_field($author_id, string $slug, string $field_type) {
+
+		return __udesly_get_field($author_id, $slug, $field_type, "user_");
+	}
+
+}
+
+if (!function_exists('udesly_get_custom_post_field')) {
+
+	function udesly_get_custom_post_field($post_id, string $slug, string $field_type) {
+		return __udesly_get_field($post_id, $slug, $field_type);
+	}
+}
+
+if (!function_exists('udesly_get_custom_term_field')) {
+
+	function udesly_get_custom_term_field($term_id, string $slug, string $field_type) {
+		return __udesly_get_field($term_id, $slug, $field_type, "term_");
 	}
 
 }

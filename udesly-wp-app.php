@@ -71,4 +71,7 @@ add_action('plugins_loaded', function () {
 			return $show_admin;
 		} );
 	}
-});
+
+	\Udesly\Theme\Theme::instance()->delete_last_import_transient();
+	//dd(udesly_get_custom_term_field(40, 'video-link', "Video"));
+}, 99);

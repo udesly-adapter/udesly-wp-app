@@ -32,7 +32,7 @@ if (!function_exists('udesly_get_image'))  {
 
 		$args  = wp_parse_args( $args, [
 			"id"   => null,
-			"size" => "post-thumbnail"
+			"size" => "full"
 		] );
 
 		if ( ! $args["id"] ) {
@@ -56,7 +56,7 @@ if (!function_exists('udesly_get_image'))  {
 		}
 
 		$image = (object) [
-			"alt" => udesly_get_post_thumbnail_alt(),
+			"alt" => get_post_meta( $args["id"], '_wp_attachment_image_alt', true ) ?? "",
 			"src"    => esc_url( wp_get_attachment_image_url( $args["id"], $args["size"] ) ?? '' ),
 			"srcset" => wp_get_attachment_image_srcset( $args["id"] ),
 			"sizes"  => wp_get_attachment_image_sizes( $args["id"] ),

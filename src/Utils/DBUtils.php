@@ -69,7 +69,7 @@ final class DBUtils {
 			case "RichText":
 				return wp_kses_post( $value );
 			case "Bool":
-				return (bool) $value ? "yes" : "";
+				return (bool) $value ? "1" : "0";
 			case "ImageRef":
 				$result = self::upload_from_url($value->url);
 				if (isset($result['attachment_id'])) {
@@ -80,6 +80,8 @@ final class DBUtils {
 				}
 				return null;
 			case "Video":
+				dd($value);
+				return $value->url ?? "";
 			case "FileRef":
 				$result = self::upload_from_url($value->url);
 				if (isset($result['attachment_id'])) {

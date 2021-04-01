@@ -36,7 +36,17 @@ final class Theme {
 	private function is_stale_data(): bool {
 		$mtime = FSUtils::mtime( $this->data_path );
 
-		return $mtime > $this->get_last_import_time();
+		if ($mtime > $this->get_last_import_time()) {
+			if ($this->get_last_filesize() !== filesize($this->data_path)) {
+				return true;
+			}
+			if ($this->get_last_file_hash() !== sha1_file($this->data_path)) {
+				return true;
+			}
+		}
+
+		return false;
+
 	}
 
 	private function _import_posts( array $posts, string $type ) {
@@ -101,6 +111,19 @@ final class Theme {
 		return $status ? $status : (Object) ['status' => 'idle'];
 	}
 
+	private function on_import_end() {
+		$this->set_last_import_time();
+		$this->set_last_filesize();
+		$this->set_last_file_hash();
+		$homepage = get_page_by_path("index");
+		if ($homepage) {
+			update_option( 'page_on_front', $homepage->ID );
+			update_option( 'show_on_front', 'page' );
+		}
+		flush_rewrite_rules(true);
+		$this->set_background_import_status("idle");
+	}
+
 	private function set_background_import_status( string $status, int $next_index = 0, $import_type = "users", $has_next = true ) {
 
 		$import_types = ["users", "terms", "posts"];
@@ -118,9 +141,7 @@ final class Theme {
 				return;
 			} else {
 				// End of import
-				$this->set_last_import_time();
-				flush_rewrite_rules(true);
-				$this->set_background_import_status("idle");
+				$this->on_import_end();
 			}
 		}
 
@@ -169,12 +190,30 @@ final class Theme {
 		return (int) get_transient( '_udesly_last_data_import' );
 	}
 
-	public function delete_last_import_time() {
+	public function get_last_filesize() : int {
+		return (int) get_transient('_udesly_last_data_file_size');
+	}
+
+	public function get_last_file_hash() : string {
+		return (string) get_transient('_udesly_last_file_hash');
+	}
+
+	public function delete_last_import_transient() {
 		delete_transient( '_udesly_last_data_import' );
+		delete_transient('_udesly_last_data_file_size');
+		delete_transient('_udesly_last_file_hash');
 	}
 
 	public function set_last_import_time() {
 		set_transient( '_udesly_last_data_import', time() );
+	}
+
+	public function set_last_filesize() {
+		set_transient( '_udesly_last_data_file_size', filesize( $this->data_path ) );
+	}
+
+	public function set_last_file_hash() {
+		set_transient( '_udesly_last_file_hash', sha1_file( $this->data_path ) );
 	}
 
 	public function udesly_import_data() {
