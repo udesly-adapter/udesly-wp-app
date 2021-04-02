@@ -247,10 +247,24 @@ if (!function_exists( '__udesly_prepare_field')) {
 
 	function __udesly_prepare_field( string $field_type, $field_value )  {
 		switch ($field_type) {
+			case "image":
 			case "ImageRef":
 				return udesly_get_image([
 					"id" => $field_value
 				]);
+			case "Set":
+				$results = [];
+				while(have_rows($field_value['slug'], $field_value['id'])) {
+					$result = [];
+					the_row();
+					$loop = acf_get_loop('active');
+
+					foreach ($loop['field']['sub_fields'] as $sub_field) {
+						$result[$sub_field['name']] = __udesly_prepare_field($sub_field['type'], get_sub_field($sub_field['name']));
+					}
+					$results[] = $result;
+				}
+				return $results;
 			default:
 				return $field_value;
 		}
@@ -287,7 +301,12 @@ if (!function_exists('__udesly_get_field')) {
 			return $cache;
 		}
 
-		$field = get_field( $slug, $id, false );
+		if ($field_type === "Set") {
+			$field = [ "slug" => $slug, "id" => $id ];
+
+		} else {
+			$field = get_field( $slug, $id, false );
+		}
 
 		$value = __udesly_prepare_field( $field_type, $field );
 

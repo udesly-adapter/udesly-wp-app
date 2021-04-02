@@ -73,6 +73,14 @@ final class Theme {
 
 	public function import_data( $type, $start_index = 0, $chunks = 5) {
 
+		$lock_key = "udesly_lock" . $type . $start_index . $chunks;
+
+		if (get_transient($lock_key)) {
+			return; // already fired
+		}
+
+		set_transient($lock_key, "true");
+
 		$data = FSUtils::get_json_content( $this->data_path );
 
 		switch ($type) {
@@ -99,6 +107,8 @@ final class Theme {
 		} else {
 			$this->set_background_import_status( "complete", 0, $type, false );
 		}
+
+		delete_transient($lock_key);
 	}
 
 	private function set_bg_message( string $message ) {
@@ -205,7 +215,6 @@ final class Theme {
 			delete_transient('_udesly_last_data_file_size');
 			delete_transient('_udesly_last_file_hash');
 		}
-
 	}
 
 	public function set_last_import_time() {
@@ -236,9 +245,46 @@ final class Theme {
 
 	}
 
+	function get_current_admin_url($action = null) {
+		$uri = isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
+		$uri = preg_replace( '|^.*/wp-admin/|i', '', $uri );
+
+		if ( ! $uri ) {
+			$uri = "";
+		}
+
+		$uri = remove_query_arg( array( 'action','_wpnonce', '_wc_notice_nonce', 'wc_db_update', 'wc_db_update_nonce', 'wc-hide-notice' ), admin_url( $uri ) );
+
+		return $action ? add_query_arg('action', $action, $uri) : $uri;
+	}
+
+	public function public_hooks() {
+		add_action("wp_enqueue_scripts", function () {
+			wp_register_style("udesly-common", UDESLY_PLUGIN_URI . 'assets/frontend/css/common.css', [], UDESLY_PLUGIN_VERSION);
+
+			wp_enqueue_style("udesly-common");
+		});
+
+		add_filter('render_block_core/image', function ($block_content, $block) {
+			/*"w-richtext-align-center";
+			"w-richtext-align-fullwidth";
+			"w-richtext-align-normal";
+			"w-richtext-align-floatleft";
+			"w-richtext-align-floatright";*/
+			if (strpos( $block_content, "w-richtext") === false) {
+				return str_replace('figure class="', 'figure class="w-richtext-figure-type-image w-richtext-align-fullwidth ', $block_content);
+			}
+			return $block_content;
+		}, 10, 2);
+
+	}
+
+
 	public function admin_hooks() {
 
 		add_action( 'admin_init', [ $this, 'check_data' ] );
+
+		$background_status = $this->get_background_import_status();
 
 		add_filter( 'heartbeat_received', function (array $response, array $data) {
 			if ( empty( $data['udesly_check_data'] ) ) {
@@ -252,23 +298,51 @@ final class Theme {
 			return $response;
 		}, 10, 2);
 
-		add_action('admin_enqueue_scripts', function () {
+		add_action('admin_enqueue_scripts', function () use ($background_status) {
 
-			wp_register_script('udesly-theme-admin', UDESLY_PLUGIN_URI . '/assets/admin/js/theme.js', [], UDESLY_PLUGIN_VERSION, true);
+			wp_register_script('udesly-theme-admin', UDESLY_PLUGIN_URI . 'assets/admin/js/theme.js', [], UDESLY_PLUGIN_VERSION, true);
 			wp_localize_script('udesly-theme-admin', 'udesly_theme_admin', [
-				'import_data' => $this->get_background_import_status(),
+				'import_data' => $background_status,
 				'nonce' => wp_create_nonce('udesly_import_data'),
 				'action' => 'udesly_import_data'
 			]);
 
 
 			wp_enqueue_script('udesly-theme-admin');
+			wp_register_style('udesly-theme-admin', UDESLY_PLUGIN_URI . 'assets/admin/css/theme.css', [], UDESLY_PLUGIN_VERSION);
+			wp_enqueue_style('udesly-theme-admin' );
 
+		});
+
+		add_action("admin_init", function () {
+			if (isset($_GET['action']) && $_GET['action'] === "udesly_delete_last_import") {
+				if (wp_verify_nonce($_GET['_wpnonce'], "udesly_delete_last_import")) {
+					$this->delete_last_import_transient();
+				}
+				wp_redirect($this->get_current_admin_url());
+				die;
+			}
 		});
 
 		add_action('wp_ajax_udesly_import_data', [$this, 'udesly_import_data']);
 
+		add_action( 'admin_bar_menu', function (\WP_Admin_Bar $admin_bar) use ($background_status) {
 
+			if ($background_status['status'] !== "idle") {
+				return;
+			}
+
+			$admin_bar->add_menu( array(
+				'id'    => 'udesly-menu',
+				'parent' => null,
+				'group'  => null,
+				'title' => 'Udesly', //you can use img tag with image link. it will show the image icon Instead of the title.
+				'href' => wp_nonce_url($this->get_current_admin_url("udesly_delete_last_import"), "udesly_delete_last_import"),
+				'meta' => [
+					'title' => __( 'Udesly', 'textdomain' ), //This title will show on hover
+				]
+			) );
+		}, 500 );
 
 	}
 

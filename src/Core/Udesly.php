@@ -2,6 +2,7 @@
 
 namespace Udesly\Core;
 
+use Udesly\Extensions\ACF\CustomFields;
 use Udesly\Theme\Theme;
 
 defined('ABSPATH') || exit;
@@ -52,11 +53,10 @@ final class Udesly
 
     private function init_hooks()
     {
-        add_action('after_setup_theme', function () {
-            if ((Theme::instance())->is_valid()) {
-                $this->init();
-            }
-        }, 0);
+	    if ((Theme::instance())->is_valid()) {
+		    $this->init();
+	    }
+
 
     }
 
@@ -68,7 +68,8 @@ final class Udesly
 
 
     private function public_hooks() {
-
+	    (Theme::instance())->public_hooks();
+	    (CustomFields::instance())->public_hooks();
     }
 
     private function init()
