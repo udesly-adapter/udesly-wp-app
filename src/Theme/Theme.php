@@ -265,6 +265,7 @@ final class Theme {
 			wp_enqueue_style("udesly-common");
 		});
 
+
 		add_filter('render_block_core/image', function ($block_content, $block) {
 			/*"w-richtext-align-center";
 			"w-richtext-align-fullwidth";

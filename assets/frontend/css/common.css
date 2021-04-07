@@ -11,3 +11,7 @@
 .w-richtext  .wp-block-image figure img {
     height: auto;
 }
+
+.screen-reader-text {
+    display: none!important;
+}

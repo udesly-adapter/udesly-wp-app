@@ -75,6 +75,6 @@ add_action('plugins_loaded', function () {
 
 
 	// \Udesly\Theme\Theme::instance()->delete_last_import_transient();
-	$field = udesly_get_custom_post_field(1675, 'set', "Set");
-	dd($field);
-}, 99);
+	//$field = udesly_get_custom_post_field(1675, 'set', "Set");
+	//dd($field);
+}, 10);

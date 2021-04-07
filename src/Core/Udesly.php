@@ -3,6 +3,7 @@
 namespace Udesly\Core;
 
 use Udesly\Extensions\ACF\CustomFields;
+use Udesly\FrontendEditor\FrontendEditor;
 use Udesly\Theme\Theme;
 
 defined('ABSPATH') || exit;
@@ -74,6 +75,11 @@ final class Udesly
 
     private function init()
     {
+
+    	if (FrontendEditor::isActive()) {
+		    (FrontendEditor::instance())->run();
+	    }
+
         if (is_admin()) {
 	        $this->admin_hooks();
         }
