@@ -17,7 +17,7 @@ iframe {
 [class^=Watermark] {
     display: none!important;
 }
-
-[data-tooltip="Table"] {
+/**/
+[data-tooltip="Table"], [aria-label="toggles cms sidebar"] {
     display: none!important;
 }
