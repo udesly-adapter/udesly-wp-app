@@ -13,12 +13,18 @@ class FrontendEditor {
 	}
 
 	static function get_frontend_editor_data($template) {
+		delete_option("_udesly_fe_$template");
+		delete_option("_udesly_fe__global");
 		$data = get_option("_udesly_fe_$template");
 		if ($data) {
 			return $data;
 		}
 
 		return FrontendEditor::import_frontend_editor_data($template);
+	}
+
+	static function get_frontend_editor_global_data() {
+		return FrontendEditor::get_frontend_editor_data("_global");
 	}
 
 	static function import_frontend_editor_data($template) {

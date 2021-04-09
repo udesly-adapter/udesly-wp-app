@@ -12,10 +12,10 @@ if (!function_exists('_u')) {
 if (!function_exists('udesly_set_frontend_editor_data')) {
 
 	function udesly_set_frontend_editor_data($template) {
-		$data = \Udesly\FrontendEditor\FrontendEditor::get_frontend_editor_data($template);
 		global $udesly_fe_data;
 		$udesly_fe_data = [];
-		$udesly_fe_data['page'] = json_decode($data);
+		$udesly_fe_data['page'] = json_decode(\Udesly\FrontendEditor\FrontendEditor::get_frontend_editor_data($template));
+		$udesly_fe_data['global'] = json_decode(\Udesly\FrontendEditor\FrontendEditor::get_frontend_editor_global_data());
 	}
 }
 

@@ -2,10 +2,26 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
 import './app.css';
+import {onIframeLoad} from "./utils/on-iframe-load";
 
-ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById('udesly-frontend-editor')
-);
+const iframe = document.getElementById("frontend-editor-frame");
+if (  iframe.contentWindow.readyState  === 'complete' ) {
+    //iframe.contentWindow.alert("Hello");
+    onIframeLoad(iframe);
+} else {
+    iframe.onload = function(){
+        onIframeLoad(iframe);
+    };
+}
+
+document.addEventListener('udesly-fe.init', e => {
+    const {globalConfig, pageConfig, iframe} = e.detail;
+    ReactDOM.render(
+        <React.StrictMode>
+            <App globalConfig={globalConfig} pageConfig={pageConfig} iframe={iframe}/>
+        </React.StrictMode>,
+        document.getElementById('udesly-frontend-editor')
+    );
+}, {once: true})
+
+/**/

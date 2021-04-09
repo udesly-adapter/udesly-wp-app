@@ -17,7 +17,22 @@ iframe {
 [class^=Watermark] {
     display: none!important;
 }
-/**/
+
 [data-tooltip="Table"], [aria-label="toggles cms sidebar"] {
     display: none!important;
+}
+ label[class^=FieldLabel] {
+  display: none;
+}
+
+ label[for^=textarea] + div [data-tooltip="Heading"] {
+     display: none;
+ }
+
+[class^=FullscreenModal] {
+    max-width: 800px!important;
+}
+
+[class^=FormFooter] button {
+    flex: 1;
 }

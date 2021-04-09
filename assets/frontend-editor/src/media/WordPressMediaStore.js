@@ -61,6 +61,7 @@ export default class WordPressMediaStore {
     }
 
     async previewSrc(src, fieldPath, formValues) {
+        console.log(src);
        return src.previewSrc;
     }
 
