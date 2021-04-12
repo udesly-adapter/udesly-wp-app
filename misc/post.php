@@ -26,9 +26,50 @@ if ( ! function_exists( 'udesly_the_post_thumbnail_alt' ) ) {
 
 }
 
+if (! function_exists('_udesly_sanitize_image_obj')) {
+	function _udesly_sanitize_image_obj($obj) {
+		$args = [
+			"id" => "local",
+			"src"    => "",
+			"alt"    => "",
+			"srcset" => "",
+			"sizes"  => ""
+		];
+
+		if (property_exists($obj, "alt")) {
+			$args['alt'] = $obj->alt;
+		}
+		if (property_exists($obj, "src")) {
+			if (\Udesly\Utils\StringUtils::contains($obj->src, ':')) {
+				$args['src'] = $obj->src;
+			} else {
+				$args['src'] = untrailingslashit(get_template_directory_uri()) . $obj->src;
+			}
+		}
+		if (property_exists($obj, "srcset") && is_array($obj->srcset)) {
+			foreach ($obj->srcset as $src) {
+				if (\Udesly\Utils\StringUtils::contains($src, ':')) {
+					$args['srcset'] .= $src;
+				} else {
+					$args['srcset'] .= untrailingslashit(get_template_directory_uri()) . $src;
+				}
+			}
+		}
+
+		return (object) $args;
+	}
+}
+
 if (!function_exists('udesly_get_image'))  {
 
 	function udesly_get_image( $args = [] ) {
+
+		if (is_object($args) && !property_exists($args, 'id')) {
+
+			return _udesly_sanitize_image_obj($args);
+		} else {
+			$args = (array) $args;
+		}
 
 		$args  = wp_parse_args( $args, [
 			"id"   => null,
@@ -48,6 +89,7 @@ if (!function_exists('udesly_get_image'))  {
 
 		if ( ! $args["id"] ) {
 			return (object) [
+				"id" => "",
 				"src"    => "",
 				"alt"    => "",
 				"srcset" => "",
@@ -56,6 +98,7 @@ if (!function_exists('udesly_get_image'))  {
 		}
 
 		$image = (object) [
+			"id" => $args["id"],
 			"alt" => get_post_meta( $args["id"], '_wp_attachment_image_alt', true ) ?? "",
 			"src"    => esc_url( wp_get_attachment_image_url( $args["id"], $args["size"] ) ?? '' ),
 			"srcset" => wp_get_attachment_image_srcset( $args["id"] ),

@@ -34,6 +34,23 @@ function App({pageConfig, globalConfig, iframe}) {
             document.querySelector('[aria-label="toggles cms sidebar"]').click();
             document.body.classList.add('loaded');
         }, 20)
+
+        document.addEventListener('udesly-fe.notice', e => {
+            const notice = e.detail;
+            if (notice && notice.message) {
+                switch (notice.type) {
+                    case 'error':
+                        cms.alerts.error(notice.message);
+                        break;
+                    case 'success':
+                        cms.alerts.success(notice.message);
+                        break;
+                    default: {
+                        cms.alerts.info(notice.message)
+                    }
+                }
+            }
+        })
     }, [])
 
 

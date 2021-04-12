@@ -2,6 +2,7 @@
 
 namespace Udesly\Theme;
 
+use Udesly\FrontendEditor\FrontendEditor;
 use Udesly\Utils\DBUtils;
 use Udesly\Utils\FSUtils;
 use Udesly\Utils\Notices;
@@ -73,13 +74,16 @@ final class Theme {
 
 	public function import_data( $type, $start_index = 0, $chunks = 5) {
 
-		$lock_key = "udesly_lock" . $type . $start_index . $chunks;
 
-		if (get_transient($lock_key)) {
-			return; // already fired
-		}
+		if ($type !== "frontend-editor") {
 
-		set_transient($lock_key, "true");
+			$lock_key = "udesly_lock" . $type . $start_index . $chunks;
+
+			if (get_transient($lock_key)) {
+				return; // already fired
+			}
+
+			set_transient($lock_key, "true");
 
 		$data = FSUtils::get_json_content( $this->data_path );
 
@@ -95,20 +99,28 @@ final class Theme {
 				break;
 		}
 
-		$post_chunks = array_chunk($posts, $chunks);
 
-		if ($post_chunks[$start_index]) {
-			$this->_import_posts( $post_chunks[$start_index], $type );
-			if (isset($post_chunks[$start_index+1])) {
-				$this->set_background_import_status( "pending", $start_index+1, $type, true );
+			$post_chunks = array_chunk($posts, $chunks);
+
+			if ($post_chunks[$start_index]) {
+				$this->_import_posts( $post_chunks[$start_index], $type );
+				if (isset($post_chunks[$start_index+1])) {
+					$this->set_background_import_status( "pending", $start_index+1, $type, true );
+				} else {
+					$this->set_background_import_status( "complete", 0, $type, false );
+				}
 			} else {
 				$this->set_background_import_status( "complete", 0, $type, false );
 			}
-		} else {
+
+			delete_transient($lock_key);
+		}
+		else {
+			FrontendEditor::import_all_data();
 			$this->set_background_import_status( "complete", 0, $type, false );
 		}
 
-		delete_transient($lock_key);
+
 	}
 
 	private function set_bg_message( string $message ) {
@@ -137,6 +149,10 @@ final class Theme {
 	private function set_background_import_status( string $status, int $next_index = 0, $import_type = "users", $has_next = true ) {
 
 		$import_types = ["users", "terms", "posts"];
+
+		if (FrontendEditor::isActive()) {
+			$import_types[] = "frontend-editor";
+		}
 
 		if ($status == "complete") {
 			$key = array_search($import_type, $import_types);
@@ -170,11 +186,15 @@ final class Theme {
 			case "idle":
 				if ( $this->is_stale_data() ) {
 					$this->set_background_import_status( "pending" );
+				} else if (FrontendEditor::isActive() && FrontendEditor::is_stale_data()) {
+					$this->set_background_import_status( "pending", 0, "frontend-editor" );
 				}
 				break;
 			case "complete":
 				if ( $this->is_stale_data() ) {
 					$this->set_background_import_status( "pending" );
+				} else if (FrontendEditor::isActive() && FrontendEditor::is_stale_data()) {
+					$this->set_background_import_status( "pending", 0, "frontend-editor" );
 				} else {
 					$this->set_background_import_status( "idle", 0, "users", false );
 				}
@@ -323,6 +343,14 @@ final class Theme {
 				wp_redirect($this->get_current_admin_url());
 				die;
 			}
+			if (isset($_GET['action']) && $_GET['action'] === "udesly_delete_frontend_editor_data") {
+				if (wp_verify_nonce($_GET['_wpnonce'], "udesly_delete_frontend_editor_data")) {
+					FrontendEditor::delete_all_data();
+					$this->set_background_import_status( "pending", 0, "frontend-editor" );
+				}
+				wp_redirect($this->get_current_admin_url());
+				die;
+			}
 		});
 
 		add_action('wp_ajax_udesly_import_data', [$this, 'udesly_import_data']);
@@ -338,11 +366,27 @@ final class Theme {
 				'parent' => null,
 				'group'  => null,
 				'title' => 'Udesly', //you can use img tag with image link. it will show the image icon Instead of the title.
-				'href' => wp_nonce_url($this->get_current_admin_url("udesly_delete_last_import"), "udesly_delete_last_import"),
+				//'href' => wp_nonce_url($this->get_current_admin_url("udesly_delete_last_import"), "udesly_delete_last_import"),
 				'meta' => [
 					'title' => __( 'Udesly', 'textdomain' ), //This title will show on hover
 				]
 			) );
+
+			$admin_bar->add_menu( array(
+				'parent' => 'udesly-menu',
+				'id' => 'udesly-import-data',
+				'title' => "Force import data from Webflow",
+				'href' => wp_nonce_url($this->get_current_admin_url("udesly_delete_last_import"), "udesly_delete_last_import"),
+			));
+
+			if (FrontendEditor::isActive()) {
+				$admin_bar->add_menu( array(
+					'parent' => 'udesly-menu',
+					'id' => 'udesly-delete-fe-data',
+					'title' => "Delete all frontend editor data",
+					'href' => wp_nonce_url($this->get_current_admin_url("udesly_delete_frontend_editor_data"), "udesly_delete_frontend_editor_data"),
+				));
+			}
 		}, 500 );
 
 	}

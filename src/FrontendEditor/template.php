@@ -17,6 +17,8 @@ $path = add_query_arg(["udesly_action" => "frontend-editor"],home_url( $wp->requ
 <!doctype html>
 <html>
     <head>
+        <link rel="preconnect" href="https://fonts.gstatic.com">
+        <link href="https://fonts.googleapis.com/css2?family=Jost&display=swap" rel="stylesheet">
         <style>
             body:not(.loaded) iframe, body:not(.loaded) #udesly-frontend-editor {
                 display: none;
@@ -24,6 +26,14 @@ $path = add_query_arg(["udesly_action" => "frontend-editor"],home_url( $wp->requ
 
             body.loaded .loader {
                 display: none;
+            }
+
+            :root {
+                --tina-font-family: 'Jost', sans-serif;
+            }
+
+            body {
+                font-family: 'Jost', sans-serif;
             }
 
             .loader {
@@ -110,7 +120,8 @@ unset($files[count($files)-1]);
         ajax_url: "<?php echo admin_url( 'admin-ajax.php' ); ?>",
         async_upload: "<?php echo admin_url('async-upload.php'); ?>",
         accept: "",
-        nonce: "<?php echo wp_create_nonce('media-form'); ?>"
+        nonce: "<?php echo wp_create_nonce('media-form'); ?>",
+        save_nonce: "<?php echo wp_create_nonce('udesly-fe-save'); ?>"
     }
 </script>
 <script src="<?php echo str_replace(UDESLY_PLUGIN_DIR_PATH . "/", UDESLY_PLUGIN_URI, $runtime); ?>"></script>

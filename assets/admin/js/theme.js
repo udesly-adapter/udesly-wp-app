@@ -72,9 +72,9 @@ var Notyf=function(){"use strict";var n,t,o=function(){return(o=Object.assign||f
         }
 
         if (document.querySelector('.notyf__message')) {
-            document.querySelector('.notyf__message').textContent = "Importing data: " + udesly_theme_admin.import_data.import_type + "...  (page: " + (Number(udesly_theme_admin.import_data.next_index) + 1) + ")";
+            document.querySelector('.notyf__message').textContent = "Importing data: " + udesly_theme_admin.import_data.import_type.replace("-", " ") + "...  " + (udesly_theme_admin.import_data.import_type !== "frontend-editor"? "(page: " + (Number(udesly_theme_admin.import_data.next_index) + 1) + ")" : "");
         } else {
-            var message = "Importing data: " + udesly_theme_admin.import_data.import_type
+            var message = "Importing data: " + udesly_theme_admin.import_data.import_type.replace("-", " ")
             if (udesly_theme_admin.import_data.import_type === "users" && udesly_theme_admin.import_data.next_index === 0) {
                 message = "Data file changed, starting background import"
             }
@@ -99,7 +99,7 @@ var Notyf=function(){"use strict";var n,t,o=function(){return(o=Object.assign||f
                 udesly_theme_admin.import_data.next_index = response.data.next_index;
                 udesly_theme_admin.import_data.import_type = response.data.import_type;
                 udesly_theme_admin.import_data.status = response.data.status;
-                fire_import();
+                setTimeout(fire_import, response.data.import_type === "frontend-editor" ? 1000 : 100);
             }
         })
     }
