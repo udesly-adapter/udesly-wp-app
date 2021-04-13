@@ -58,13 +58,12 @@ export function onIframeLoad(iframe) {
     const style = doc.createElement('style');
     style.textContent = `.fe-focused { box-shadow: 0 0 0 2px #2296fe; border-radius: 5px; }  ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent;border-style:solid;border-width:0}::-webkit-scrollbar-thumb{border-radius:100px;background:#2296fe}`
     doc.head.append(style);
-
     doc.addEventListener('click', e => {
         e.preventDefault();
 
         e.stopPropagation();
 
-        const target = e.target.matches('[data-link]') ? e.target: e.target.closest('[data-link]');
+        const target = e.target.matches('[data-link],a') ? e.target: e.target.closest('[data-link]') || e.target.closest('a');
 
         if (target) {
             const href = target.getAttribute('href');

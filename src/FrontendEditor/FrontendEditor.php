@@ -183,7 +183,7 @@ class FrontendEditor {
 				'id'    => 'udesly-fe-menu',
 				'parent' => null,
 				'group'  => null,
-				'title' => 'Frontend Editor', //you can use img tag with image link. it will show the image icon Instead of the title.
+				'title' => 'Open Frontend Editor', //you can use img tag with image link. it will show the image icon Instead of the title.
 				'href' => esc_url( add_query_arg(["edit" => "udesly-frontend-editor"], $path)),
 				'icon' => "edit",
 				'meta' => [

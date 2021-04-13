@@ -15,6 +15,10 @@ final class Theme {
 	private $data_path;
 
 	protected static $_instance = null;
+	/**
+	 * @var false|mixed|string
+	 */
+	private $hash_path;
 
 	public static function instance() {
 		if ( is_null( self::$_instance ) ) {
@@ -27,6 +31,8 @@ final class Theme {
 	private function __construct() {
 		// Get template directory always returns the parent theme folder even if child theme is active;
 		$this->data_path = PathUtils::join( get_template_directory(), "_data", "data.json" );
+		$this->hash_path = PathUtils::join(get_template_directory(), "_data", "hash");
+
 		//$this->config_path = PathUtils::join( get_template_directory(), "_data", "config.json" );
 	}
 
@@ -41,7 +47,7 @@ final class Theme {
 			if ($this->get_last_filesize() !== filesize($this->data_path)) {
 				return true;
 			}
-			if ($this->get_last_file_hash() !== sha1_file($this->data_path)) {
+			if ($this->get_last_file_hash() !== FSUtils::get_content($this->hash_path)) {
 				return true;
 			}
 		}
@@ -246,7 +252,7 @@ final class Theme {
 	}
 
 	public function set_last_file_hash() {
-		set_transient( '_udesly_last_file_hash', sha1_file( $this->data_path ) );
+		set_transient( '_udesly_last_file_hash', FSUtils::get_content( $this->hash_path ) );
 	}
 
 	public function udesly_import_data() {

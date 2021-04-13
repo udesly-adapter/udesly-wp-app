@@ -23,16 +23,30 @@ function App({pageConfig, globalConfig, iframe}) {
       {
           media: new WordPressMediaStore(),
           enabled: true,
+          toolbar: true,
           sidebar: {
            position: "displace",
           },
       }
   );
 
+    cms.events.subscribe('cms:disable', event => {
+        window.location = window.location.toString().replace(window.location.search,'')
+    })
+
     useEffect(() => {
         setTimeout(() => {
             document.querySelector('[aria-label="toggles cms sidebar"]').click();
             document.body.classList.add('loaded');
+            const exitButton = document.querySelector('button[class*=ExitButton]');
+
+           if(exitButton) {
+               const textNode = Array.from(exitButton.childNodes).find(node => node.nodeType === Node.TEXT_NODE);
+               if (textNode) {
+                   textNode.textContent = "Close Frontend Editor"
+               }
+           }
+
         }, 20)
 
         document.addEventListener('udesly-fe.notice', e => {
