@@ -112,6 +112,7 @@ function parseConfig(config, label = 'Edit Page', template) {
         initialValues: {
             img: {},
             link: {},
+            iframe: {},
             text: {},
             textarea: {},
             richtext: {}
@@ -122,7 +123,6 @@ function parseConfig(config, label = 'Edit Page', template) {
 
             for(let imgKey in dataToSend.img) {
                 if(dataToSend.img[imgKey].id && dataToSend.img[imgKey].id !== "local") {
-                    console.log(dataToSend.img[imgKey].id)
                     dataToSend.img[imgKey] = {
                         id: dataToSend.img[imgKey].id
                     }
@@ -130,8 +130,6 @@ function parseConfig(config, label = 'Edit Page', template) {
                     dataToSend.img[imgKey] = dataToSend.img[imgKey]._original
                 }
             }
-
-            console.log(dataToSend);
 
             const ajaxData = new FormData();
             ajaxData.append('action', "update_frontend_editor_data");
@@ -230,6 +228,31 @@ function parseConfig(config, label = 'Edit Page', template) {
             },
         });
         formConfig.initialValues.link[key] = config.link[key];
+    }
+    for (let key in config.iframe) {
+        if (!fieldGroups.iframe) {
+            fieldGroups.iframe = {
+                name: "iframe",
+                component: "group",
+                label: "Iframes and Videos",
+                fields: [
+                    {
+                        name: 'null',
+                        component: () => <div>Set the Absolute Url to the Video file or the Iframe</div>,
+
+                    }
+                ]
+            }
+        }
+        fieldGroups.link.fields.push({
+            name: key,
+            component: 'text',
+            parse: (value, name) => {
+                dataChanger.changeAttribute(name, value, "src");
+                return value;
+            },
+        });
+        formConfig.initialValues.iframe[key] = config.iframe[key];
     }
     for (let key in config.text) {
         if (!fieldGroups.text) {
