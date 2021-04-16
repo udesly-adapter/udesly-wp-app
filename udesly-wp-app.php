@@ -67,9 +67,9 @@ add_action('plugins_loaded', function () {
 		} );
 		// (Optional) Hide the ACF admin menu item.
 		add_filter( 'acf/settings/show_admin', function( $show_admin ) {
-			//return false;
-			return $show_admin;
-		} );
+			return false;
+			//return $show_admin;
+		}, 10);
 	}
 
 
@@ -78,3 +78,5 @@ add_action('plugins_loaded', function () {
 	//$field = udesly_get_custom_post_field(1675, 'set', "Set");
 	//dd($field);
 }, 10);
+
+

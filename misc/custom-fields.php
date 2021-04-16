@@ -341,3 +341,128 @@ if (!function_exists('udesly_get_custom_term_field')) {
 	}
 
 }
+
+add_filter('acf/location/rule_values/post_type', 'udesly_acf_location_rule_values_post');
+function udesly_acf_location_rule_values_post( $choices ) {
+	$choices['product_variation'] = 'Product Variation';
+	return $choices;
+}
+
+
+
+$GLOBALS['wc_loop_variation_id'] = null;
+
+function is_field_group_for_variation($field_group, $variation_data, $variation_post) {
+	return (preg_match( '/Variation/i', $field_group['title'] ) == true);
+}
+
+add_action( 'woocommerce_product_after_variable_attributes', function( $loop_index, $variation_data, $variation_post ) {
+	$GLOBALS['wc_loop_variation_id'] = $variation_post->ID;
+
+	foreach ( acf_get_field_groups() as $field_group ) {
+		if ( is_field_group_for_variation( $field_group, $variation_data, $variation_post ) ) {
+			acf_render_fields( $variation_post->ID, acf_get_fields( $field_group ) );
+		}
+	}
+
+	$GLOBALS['wc_loop_variation_id'] = null;
+}, 10, 3 );
+
+add_action( 'woocommerce_save_product_variation', function( $variation_id, $i ) {
+	if ( !isset( $_POST['acf_variation'][$variation_id] ) ) {
+		return;
+	}
+
+	if (is_array( ( $fields = $_POST['acf_variation'][ $variation_id ] ) ) )  {
+		foreach ( $fields as $key => $val ) {
+			update_field( $key, $val, $variation_id );
+		}
+	}
+}, 10, 2 );
+
+add_filter( 'acf/prepare_field', function ( $field ) {
+	if ( !$GLOBALS['wc_loop_variation_id'] ) {
+		return $field;
+	}
+
+	$field['name'] = preg_replace( '/^acf\[/', 'acf_variation[' . $GLOBALS['wc_loop_variation_id'] . '][', $field['name'] );
+
+	return $field;
+}, 10, 1);
+
+
+add_action("acf/init", function () {
+	if ( function_exists( 'acf_add_local_field_group' ) ):
+
+		acf_add_local_field_group( array(
+			'key'                   => 'group_607965fe198b0',
+			'title'                 => 'Variations',
+			'fields'                => array(
+				array(
+					'key'               => 'field_60796608be0e2',
+					'label'             => 'More Images',
+					'name'              => 'more-images',
+					'type'              => 'set',
+					'instructions'      => '',
+					'required'          => 0,
+					'conditional_logic' => 0,
+					'wrapper'           => array(
+						'width' => '',
+						'class' => '',
+						'id'    => '',
+					),
+					'collapsed'         => '',
+					'min'               => 0,
+					'max'               => 0,
+					'layout'            => 'table',
+					'button_label'      => '',
+					'sub_fields'        => array(
+						array(
+							'key'               => 'field_6079661ebe0e3',
+							'label'             => 'Image',
+							'name'              => 'image',
+							'type'              => 'image',
+							'instructions'      => '',
+							'required'          => 0,
+							'conditional_logic' => 0,
+							'wrapper'           => array(
+								'width' => '',
+								'class' => '',
+								'id'    => '',
+							),
+							'return_format'     => 'id',
+							'preview_size'      => 'medium',
+							'library'           => 'all',
+							'min_width'         => '',
+							'min_height'        => '',
+							'min_size'          => '',
+							'max_width'         => '',
+							'max_height'        => '',
+							'max_size'          => '',
+							'mime_types'        => '',
+						),
+					),
+				),
+			),
+			'location'              => array(
+				array(
+					array(
+						'param'    => 'post_type',
+						'operator' => '==',
+						'value'    => 'product_variation',
+					),
+				),
+			),
+			'menu_order'            => 0,
+			'position'              => 'normal',
+			'style'                 => 'default',
+			'label_placement'       => 'top',
+			'instruction_placement' => 'label',
+			'hide_on_screen'        => '',
+			'active'                => true,
+			'description'           => '',
+		) );
+
+	endif;
+
+});
