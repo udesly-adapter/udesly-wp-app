@@ -1,0 +1,18 @@
+{
+  "name": "udesly-frontend-scripts",
+  "version": "3.0.0",
+  "description": "",
+  "main": "src/udesly-frontend-scripts.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "node scripts/build.js --watch",
+    "build": "node scripts/build.js --production"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@rematch/core": "^2.0.1",
+    "esbuild": "^0.11.12",
+    "typescript": "^4.2.4"
+  }
+}

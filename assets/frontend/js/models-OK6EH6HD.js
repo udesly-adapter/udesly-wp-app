@@ -1,0 +1,1 @@
+import{b as r}from"./chunk-6NG5PWRZ.js";import"./chunk-CDMELAGU.js";var t=r()({state:0,reducers:{increment(o,e){return o+e}},effects:o=>({incrementAsync(e,c){o.count.increment(e)}})});var p={count:t};export{p as models};

@@ -6,9 +6,60 @@ if (!function_exists('udesly_get_wc_image')) {
 
 
 	function udesly_get_wc_image() {
+		$image = udesly_get_image();
 
+		if (!$image->id) {
+			return (object) [
+				"id" => "",
+				"sizes" => "",
+				"src" => wc_placeholder_img_src(),
+				"srcset" => "",
+				"alt" => "product image placeholder"
+			];
+		}
+
+		return $image;
 	}
 
+}
+
+if (!function_exists('udesly_get_price')) {
+
+
+	function udesly_get_price() {
+		global $product, $variant;
+
+		if (!$variant) {
+			$variant = $product;
+		}
+
+		return wc_price($variant->get_price());
+	}
+
+}
+
+if (!function_exists('udesly_get_compare_at_price')) {
+
+	function udesly_get_compare_at_price() {
+		global $product, $variant;
+
+		if (!$variant) {
+			$variant = $product;
+		}
+
+		if ($variant->is_on_sale()) {
+			return wc_price($variant->get_regular_price());
+		}
+	}
+}
+
+if (!function_exists('udesly_get_wc_product_default_variant')) {
+
+	function udesly_get_wc_product_default_variant() {
+		global $product;
+
+		return $product;
+	}
 }
 
 if (!function_exists('udesly_wc_checkout')) {

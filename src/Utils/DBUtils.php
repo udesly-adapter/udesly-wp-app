@@ -383,10 +383,21 @@ final class DBUtils {
 			    $post->post_category = $categories;
             }
 
+
+
 			$post_id = wp_insert_post( (array) $post );
 
 			if ( is_wp_error( $post_id ) ) {
 				return null;
+			}
+
+			if (property_exists($post, 'tax_input')) {
+				$taxes = $post->tax_input;
+				unset($post->tax_input);
+
+				foreach ($taxes as $tax_name => $slugs) {
+					wp_set_object_terms($post_id, $slugs, $tax_name, false);
+				}
 			}
 
 			if ( property_exists( $post, 'meta_input' ) ) {

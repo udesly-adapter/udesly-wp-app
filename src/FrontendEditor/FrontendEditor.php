@@ -2,14 +2,13 @@
 
 namespace Udesly\FrontendEditor;
 
-use Udesly\Utils\FSUtils;
 
 defined( 'ABSPATH' ) || exit;
 
 class FrontendEditor {
 
 	static function isActive(): bool {
-		return true;
+		return file_exists(trailingslashit(get_template_directory()) . '_data/frontend-editor/hash');
 	}
 
 	static function get_frontend_editor_data($template) {
