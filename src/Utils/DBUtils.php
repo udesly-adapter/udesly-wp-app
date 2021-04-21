@@ -64,6 +64,7 @@ final class DBUtils {
 			case "Option":
 			case "Date":
 			case "Link":
+			case "CommercePrice":
 			case "PlainText":
 				return sanitize_text_field( $value );
 			case "RichText":
@@ -106,18 +107,18 @@ final class DBUtils {
 				if ($ref === "author") {
 					$user = DBUtils::get_user_by_login_name($value);
 					if ($user) {
-						return [$user->ID];
+						return $user->ID;
 					}
 				} else {
 					if ($refType === "post") {
 						$post = DBUtils::get_post_by_slug($value, ["post_type" => $ref, "fields" => "ids"]);
 						if ($post) {
-							return [$post];
+							return $post;
 						}
 					}else {
 						$term = DBUtils::get_term_by_slug($value, $ref);
 						if ($term) {
-							return [$term->term_id];
+							return $term->term_id;
 						}
 					}
 				}
