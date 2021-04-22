@@ -93,6 +93,7 @@ final class Theme {
 
 		$data = FSUtils::get_json_content( $this->data_path );
 
+
 		switch ($type) {
 			case "users":
 				$posts = $data->users;
@@ -104,7 +105,6 @@ final class Theme {
 				$posts = $data->posts;
 				break;
 		}
-
 
 			$post_chunks = array_chunk($posts, $chunks);
 
@@ -210,7 +210,9 @@ final class Theme {
 	}
 
 	public function check_data() {
+
 		if ( FSUtils::is_available() ) {
+
 			$this->schedule_import_data();
 			add_action('wp_ajax_udesly_import_data', [$this, 'udesly_import_data']);
 		} else {
@@ -263,9 +265,12 @@ final class Theme {
 
 		$next_index = intval($_POST['next_index']);
 
+
 		$type = sanitize_text_field($_POST['import_type']);
 
 		$this->import_data($type, $next_index);
+
+
 
 		wp_send_json_success($this->get_background_import_status());
 
@@ -285,6 +290,8 @@ final class Theme {
 	}
 
 	public function public_hooks() {
+
+
 		add_action("wp_enqueue_scripts", function () {
 			wp_register_style("udesly-common", UDESLY_PLUGIN_URI . 'assets/frontend/css/common.css', [], UDESLY_PLUGIN_VERSION);
 

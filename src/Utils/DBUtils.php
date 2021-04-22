@@ -2,8 +2,44 @@
 
 namespace Udesly\Utils;
 
+function debug_log($val) {
+	error_log(print_r($val, true));
+}
+
 final class DBUtils {
 
+
+	static function create_wc_attributes(array $attributes) {
+		if (class_exists('woocommerce')) {
+			$results = [];
+			foreach ($attributes as $attribute) {
+				if (!taxonomy_exists("pa_" . $attribute->slug)) {
+				  wc_create_attribute([
+				  	"name" => $attribute->name,
+				    "slug" => $attribute->slug,
+				  ]);
+				}
+
+
+				foreach ($attribute->values as $value) {
+					self::create_term_if_necessary((object) [
+						"name" => $value->name,
+						"slug" => $value->slug,
+						"taxonomy" => "pa_" . $attribute->slug,
+					]);
+				}
+				$results[] = [
+					"name" => "pa_" . $attribute->slug,
+					"value" => "",
+					"is_visible" => '1',
+					"is_variation" => "1",
+					"is_taxonomy" => "1"
+				];
+			}
+			return $results;
+		}
+		return [];
+	}
 
 	static function create_user_if_necessary( \stdClass $user ): ?int {
 		$user = sanitize_post( $user );
@@ -100,6 +136,8 @@ final class DBUtils {
 					}
 				}
 				return $results;
+			case "CommercePropTable":
+				return self::create_wc_attributes($value);
 			case "ItemRef":
 				$ref = $meta_value->ref;
 				$refType = $meta_value->refType;
@@ -339,17 +377,51 @@ final class DBUtils {
 			return $id;
 		}
 
+
 		$old_post = self::get_post_by_slug( $post->post_name, [
-			'post_type'   => $post->post_type,
-			'post_status' => 'publish',
-			'fields'      => 'ids'
+				'post_type'   => $post->post_type,
+				'post_status' => 'publish',
+				'fields'      => 'ids'
 		] );
 
+
 		if ( ! $old_post ) {
+
+			if ( $post->post_type === "product_variation" && class_exists('woocommerce')) {  // Before sanitize otherwise it fails
+
+				$post->post_parent = self::get_post_by_slug($post->post_parent, [
+					"post_type" => "product",
+					"fields" => "ids"
+				]);
+
+				$old_post = self::get_post_by_slug( "product-" . $post->post_parent . "-variation", [
+					'post_type'   => $post->post_type,
+					'post_status' => 'publish',
+					'fields'      => 'ids'
+				] );
+
+				if ($old_post) {
+					return $old_post;
+				}
+			}
+
 			$post = sanitize_post( $post );
 			if ( ! property_exists( $post, 'post_status' ) ) {
 				$post->post_status = 'publish';
 			}
+
+			if ( $post->post_type === "product_variation" && class_exists('woocommerce')) {  // Before sanitize otherwise it fails
+
+				$product = wc_get_product($post->post_parent);
+
+				$post->post_title = $product->get_name();
+
+				//$post->post_name = "product-" . $post->post_parent . "-variation";
+
+				$post->guid = $product->get_permalink();
+
+			}
+
 			if ( ! property_exists( $post, 'post_type' ) ) {
 				$post->post_type = 'post';
 			}
@@ -388,8 +460,21 @@ final class DBUtils {
 
 			$post_id = wp_insert_post( (array) $post );
 
+
 			if ( is_wp_error( $post_id ) ) {
 				return null;
+			}
+
+
+
+			if ( property_exists( $post, 'meta_input' ) ) {
+				$meta = $post->meta_input;
+				unset( $post->meta_input );
+			}
+
+			if ( property_exists( $post, 'custom_meta_input' ) ) {
+				$custom_meta = $post->custom_meta_input;
+				unset( $post->custom_meta_input );
 			}
 
 			if (property_exists($post, 'tax_input')) {
@@ -401,15 +486,6 @@ final class DBUtils {
 				}
 			}
 
-			if ( property_exists( $post, 'meta_input' ) ) {
-				$meta = $post->meta_input;
-				unset( $post->meta_input );
-			}
-
-			if ( property_exists( $post, 'custom_meta_input' ) ) {
-				$custom_meta = $post->custom_meta_input;
-				unset( $post->custom_meta_input );
-			}
 
 			if ( isset( $meta ) ) {
 				foreach ( $meta as $meta_key => $meta_value ) {

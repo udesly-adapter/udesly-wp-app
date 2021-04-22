@@ -32,6 +32,7 @@ var Notyf=function(){"use strict";var n,t,o=function(){return(o=Object.assign||f
         fire_import();
     }
 
+    window.fire = fire_import;
     var showedComplete = false;
 
     var importedTimes = 0;
@@ -94,12 +95,14 @@ var Notyf=function(){"use strict";var n,t,o=function(){return(o=Object.assign||f
         importing = true;
         importedTimes++;
         $.post(ajaxurl, data, function (response) {
+
             if(response.success) {
                 udesly_theme_admin.import_data.has_next = response.data.has_next;
                 udesly_theme_admin.import_data.next_index = response.data.next_index;
                 udesly_theme_admin.import_data.import_type = response.data.import_type;
                 udesly_theme_admin.import_data.status = response.data.status;
-                setTimeout(fire_import, response.data.import_type === "frontend-editor" ? 1000 : 100);
+
+               setTimeout(fire_import, 250);
             }
         })
     }

@@ -77,4 +77,34 @@ add_action('plugins_loaded', function () {
 
 add_action('init', function() {
 
+	//update_post_meta(2204, 'attribute_pa_size', "m");
+	//$variation = new WC_Product_Variation(2222);
+	//wp_set_object_terms(2200, 'xxl', "pa_size", true);
+
+	//dd($variation);
+	//dd($res);
+	//wp_set_object_terms( 2142, 'xl', 'pa_size', true );
+
+	//delete_post_meta(2176, 'attribute_pa_size');
+	//update_post_meta(2176, 'attribute_pa_size', ["m"]);
+
+	//$attributes[0]["value"] = "m|l|xl";
+
+	//update_post_meta(2142, "_product_attributes", $attributes);
+	//$p = \Udesly\Utils\DBUtils::create_post_if_necessary($variant);
+	//dd(get_post_meta(2107));
+	//wp_insert_term()
+	//$id = wc_attribute_taxonomy_id_by_name("size11");
+	//dd($id);
+	//$product = wc_get_product(2086);
+
+	//dd($product->get_attributes());
+	//dd(get_post_meta(2086));
+
+	//dd(get_post(2104));
 });
+
+
+function udy_wc_create_attributes($attributes) {
+
+}
