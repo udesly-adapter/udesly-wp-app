@@ -108,7 +108,7 @@ final class Theme {
 
 			$post_chunks = array_chunk($posts, $chunks);
 
-			if ($post_chunks[$start_index]) {
+			if (isset($post_chunks[$start_index])) {
 				$this->_import_posts( $post_chunks[$start_index], $type );
 				if (isset($post_chunks[$start_index+1])) {
 					$this->set_background_import_status( "pending", $start_index+1, $type, true );

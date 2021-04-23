@@ -119,3 +119,59 @@ function udesly_wc_show_checkout( ) {
 function udesly_wc_order_pay( $order_id ) {
 
 }
+
+
+function udesly_render_wc_add_to_cart_data() {
+
+	global $product;
+
+	if ($product->is_type('simple')) {
+
+	} else {
+
+	}
+
+}
+
+function udesly_render_wc_add_to_cart() {
+	if (is_single('product')) {
+		woocommerce_template_single_add_to_cart();
+	} else {
+		woocommerce_template_loop_add_to_cart();
+	}
+}
+
+function udesly_wc_get_quantity_input_min( $product ) {
+	return sprintf('min="%d"', apply_filters( 'woocommerce_quantity_input_min', $product->get_min_purchase_quantity(), $product ));
+}
+
+function udesly_wc_get_quantity_input_max( $product ) {
+	$max = apply_filters( 'woocommerce_quantity_input_max', $product->get_max_purchase_quantity(), $product );
+	if ($max > 0) {
+		return sprintf('max="%d"', $max);
+	}
+	return "";
+}
+
+function udesly_wc_get_quantity_input_value( $product ) {
+	return isset( $_POST['quantity'] ) ? wc_stock_amount( wp_unslash( $_POST['quantity'] ) ) : $product->get_min_purchase_quantity();
+}
+
+function udesly_wc_get_variable_product_data() {
+	global $product;
+
+	$variation_data = [];
+
+	$get_variations = count( $product->get_children() ) <= apply_filters( 'woocommerce_ajax_variation_threshold', 30, $product );
+
+	$variation_data = [
+		'available_variations' => $get_variations ? $product->get_available_variations() : false,
+		'attributes'           => $product->get_variation_attributes(),
+		'selected_attributes'  => $product->get_default_attributes(),
+	];
+
+	$variation_data['attribute_keys'] = array_keys($variation_data['attributes']);
+
+	$variations_json = wp_json_encode( $variation_data['available_variations'] );
+	$variations_attr = function_exists( 'wc_esc_json' ) ? wc_esc_json( $variations_json ) : _wp_specialchars( $variations_json, ENT_QUOTES, 'UTF-8', true );
+}

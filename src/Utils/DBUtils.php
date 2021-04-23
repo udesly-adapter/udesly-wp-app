@@ -3,7 +3,8 @@
 namespace Udesly\Utils;
 
 function debug_log($val) {
-	error_log(print_r($val, true));
+
+		error_log(var_export($val, true));
 }
 
 final class DBUtils {
@@ -360,6 +361,93 @@ final class DBUtils {
 		return get_term_by( "slug", $slug, $taxonomy );
 	}
 
+	static function create_product_variation_if_necessary(\stdClass $post) {
+		$post->post_parent = self::get_post_by_slug($post->post_parent, [
+			"post_type" => "product",
+			"fields" => "ids"
+		]);
+
+		$old_post = self::get_post_by_slug( $post->post_name, [
+			'post_type'   => $post->post_type,
+			'post_status' => 'publish',
+			'fields'      => 'ids'
+		] );
+
+
+		if ($old_post) {
+			debug_log($old_post);
+			return $old_post;
+		}
+
+		$product = wc_get_product($post->post_parent);
+
+		$post->post_title = $product->get_name();
+
+		//$post->post_name = "product-" . $post->post_parent . "-variation";
+
+		$post->guid = $product->get_permalink();
+
+		$post->post_status = "publish";
+
+
+		if ( property_exists( $post, 'custom_meta_input' ) ) {
+			$custom_meta = $post->custom_meta_input;
+			unset( $post->custom_meta_input );
+		}
+
+		if ( property_exists( $post, 'meta_input' ) ) {
+			$meta = $post->meta_input;
+			unset( $post->meta_input );
+		}
+
+
+		if ( property_exists( $post, '_thumbnail_id' ) ) {
+
+			$attachment = DBUtils::upload_from_url( $post->_thumbnail_id->url );
+
+			if ( $attachment ) {
+				if ($post->_thumbnail_id->alt) {
+					update_post_meta($attachment['attachment_id'], '_wp_attachment_image_alt', $post->_thumbnail_id->alt);
+				}
+			}
+
+			unset($post->_thumbnail_id);
+		}
+
+		$post_id = wp_insert_post( (array) $post );
+
+
+		if ( is_wp_error( $post_id ) ) {
+			return null;
+		}
+
+		if ( isset( $meta ) ) {
+			foreach ( $meta as $meta_key => $meta_value ) {
+				update_post_meta( $post_id, $meta_key, $meta_value );
+			}
+		}
+
+		if ( isset( $custom_meta ) ) {
+			foreach ( $custom_meta as $meta_key => $meta_value ) {
+				$meta_value = DBUtils::clean_custom_meta( $meta_value );
+				if ( $meta_value ) {
+					if ($meta_key == "_product_attributes") {
+						update_post_meta($post_id, '_product_attributes', $meta_value);
+					} else {
+						update_field( $meta_key, $meta_value, $post_id );
+					}
+
+				}
+			}
+		}
+
+		if ( isset ( $attachment) ) {
+			update_post_meta($post_id, '_thumbnail_id', $attachment['attachment_id']);
+		}
+
+		return $post_id;
+	}
+
 	static function create_post_if_necessary( \stdClass $post ) {
 
 		if ( StringUtils::contains( $post->post_name, '/' ) ) {
@@ -378,48 +466,23 @@ final class DBUtils {
 		}
 
 
-		$old_post = self::get_post_by_slug( $post->post_name, [
+		$old_post = $post->post_type !== "product_variation" ? self::get_post_by_slug( $post->post_name, [
 				'post_type'   => $post->post_type,
 				'post_status' => 'publish',
 				'fields'      => 'ids'
-		] );
+		]) : null;
 
 
 		if ( ! $old_post ) {
 
 			if ( $post->post_type === "product_variation" && class_exists('woocommerce')) {  // Before sanitize otherwise it fails
 
-				$post->post_parent = self::get_post_by_slug($post->post_parent, [
-					"post_type" => "product",
-					"fields" => "ids"
-				]);
-
-				$old_post = self::get_post_by_slug( "product-" . $post->post_parent . "-variation", [
-					'post_type'   => $post->post_type,
-					'post_status' => 'publish',
-					'fields'      => 'ids'
-				] );
-
-				if ($old_post) {
-					return $old_post;
-				}
+				return self::create_product_variation_if_necessary($post);
 			}
 
 			$post = sanitize_post( $post );
 			if ( ! property_exists( $post, 'post_status' ) ) {
 				$post->post_status = 'publish';
-			}
-
-			if ( $post->post_type === "product_variation" && class_exists('woocommerce')) {  // Before sanitize otherwise it fails
-
-				$product = wc_get_product($post->post_parent);
-
-				$post->post_title = $product->get_name();
-
-				//$post->post_name = "product-" . $post->post_parent . "-variation";
-
-				$post->guid = $product->get_permalink();
-
 			}
 
 			if ( ! property_exists( $post, 'post_type' ) ) {
@@ -465,8 +528,6 @@ final class DBUtils {
 				return null;
 			}
 
-
-
 			if ( property_exists( $post, 'meta_input' ) ) {
 				$meta = $post->meta_input;
 				unset( $post->meta_input );
@@ -482,7 +543,17 @@ final class DBUtils {
 				unset($post->tax_input);
 
 				foreach ($taxes as $tax_name => $slugs) {
-					wp_set_object_terms($post_id, $slugs, $tax_name, false);
+					if (StringUtils::starts_with($tax_name, "pa_")) {
+						foreach ($slugs as $slug) {
+							$wp_term = DBUtils::get_term_by_slug( $slug, $tax_name );
+							if ($wp_term) {
+								wp_set_object_terms($post_id, $wp_term->term_id, $tax_name, true);
+							}
+						}
+					} else {
+						wp_set_object_terms($post_id, $slugs, $tax_name, true);
+					}
+
 				}
 			}
 
