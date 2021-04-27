@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../src/utils/triggers.ts"],
+  "sourcesContent": ["\n\nexport function triggerJQuery(event, data = null) {\n    setTimeout(\n        () => {\n            jQuery(document.body).trigger(event, data)\n        }, 1\n    )\n}\n\nexport function onJQueryEvent(event, callback, target = document.body) {\n    jQuery(target).on(event, callback);\n}"],
+  "mappings": ";AAEO,uBAAuB,OAAO,OAAO,MAAM;AAC9C,aACI,MAAM;AACF,WAAO,SAAS,MAAM,QAAQ,OAAO;AAAA,KACtC;AAAA;AAIJ,uBAAuB,OAAO,UAAU,SAAS,SAAS,MAAM;AACnE,SAAO,QAAQ,GAAG,OAAO;AAAA;",
+  "names": []
+}

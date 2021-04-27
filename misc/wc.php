@@ -58,6 +58,33 @@ if (!function_exists('udesly_get_wc_product_default_variant')) {
 	function udesly_get_wc_product_default_variant() {
 		global $product;
 
+		if( $product->is_type('variable') ){
+			$default_attributes = $product->get_default_attributes();
+			foreach($product->get_available_variations() as $variation_values ){
+				foreach($variation_values['attributes'] as $key => $attribute_value ){
+					$attribute_name = str_replace( 'attribute_', '', $key );
+					$default_value = $product->get_variation_default_attribute($attribute_name);
+					if( $default_value == $attribute_value ){
+						$is_default_variation = true;
+					} else {
+						$is_default_variation = false;
+						break; // Stop this loop to start next main lopp
+					}
+				}
+				if( $is_default_variation ){
+					$variation_id = $variation_values['variation_id'];
+					break; // Stop the main loop
+				}
+			}
+
+			// Now we get the default variation data
+			if( $is_default_variation ){
+				// Raw output of available "default" variation details data
+
+				return wc_get_product($variation_id);
+
+			}
+		}
 		return $product;
 	}
 }

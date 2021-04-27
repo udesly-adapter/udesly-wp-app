@@ -80,11 +80,14 @@ final class Udesly
 	    (CustomFields::instance())->public_hooks();
 	    add_action('wp_enqueue_scripts', function () {
 	    	wp_register_script('udesly-frontend', UDESLY_PLUGIN_URI . 'assets/frontend/js/udesly-frontend-scripts.js', [], UDESLY_PLUGIN_VERSION, true);
-			wp_localize_script('udesly-frontend', 'udesly_frontend_options', [
+			wp_localize_script('udesly-frontend', 'udesly_frontend_options', apply_filters('udesly_localize_script_params',[
 				'plugins' => [
 					'woocommerce' => class_exists( 'woocommerce' ),
+				],
+				'wp' => [
+					'ajax_url' => admin_url( 'admin-ajax.php' )
 				]
-			]);
+			]));
 	    	wp_enqueue_script("udesly-frontend");
 	    });
 
