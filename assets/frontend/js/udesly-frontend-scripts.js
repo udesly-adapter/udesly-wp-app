@@ -5,7 +5,7 @@ import "./chunk-F543FC74.js";
 
 // src/store/index.ts
 async function initStore(woocommerce = false) {
-  const module = woocommerce ? await import("./wc-models-4J5FPKBB.js") : await import("./models-UHLHQ5FZ.js");
+  const module = woocommerce ? await import("./wc-models-RBECXARC.js") : await import("./models-UHLHQ5FZ.js");
   return init({
     models: module.models,
     name: woocommerce ? "WP/WC Store" : "WP Store",
@@ -113,7 +113,7 @@ var lastBtn;
   const udesly = woocommerce ? initUdesly(store) : initUdesly(store);
   wp(udesly);
   if (woocommerce) {
-    const module = await import("./wc-75DPZICM.js");
+    const module = await import("./wc-2FO2JP2Y.js");
     await module.default(udesly);
   }
 })();

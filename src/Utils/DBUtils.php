@@ -2,11 +2,6 @@
 
 namespace Udesly\Utils;
 
-function debug_log($val) {
-
-		error_log(var_export($val, true));
-}
-
 final class DBUtils {
 
 

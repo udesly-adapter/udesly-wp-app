@@ -29,3 +29,11 @@ if ( ! function_exists( 'bench' ) ) {
 	}
 }
 
+if ( ! function_exists( 'debug_log' ) ) {
+
+	function debug_log( $val ) {
+
+		error_log( var_export( $val, true ) );
+	}
+
+}

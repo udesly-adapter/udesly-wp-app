@@ -65,7 +65,36 @@ class WebflowCommerce {
 		    return $array;
 
         }, 10, 1);
+
+		add_action('wc_ajax_udesly_add_to_cart', [self::class, 'udesly_add_to_cart']);
+		add_action('wc_ajax_udesly_change_cart_quantity', [self::class, 'udesly_change_cart_quantity']);
+
+		add_filter('woocommerce_available_variation', [$this, 'add_variation_html_data'], 10, 3);
 	}
+
+	static function udesly_change_cart_quantity() {
+		ob_start();
+
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
+		if ( ! isset( $_POST['key'] ) || ! isset($_POST['quantity']) ) {
+			return;
+		}
+
+		WC()->cart->set_quantity(sanitize_text_field($_POST['key']), intval($_POST['quantity']));
+
+		\WC_AJAX::get_refreshed_fragments();
+    }
+
+	function add_variation_html_data($args, $t, $variation) {
+	    $args['length_html'] = udesly_wc_format_dimension($args['dimensions']['length']);
+		$args['width_html'] = udesly_wc_format_dimension($args['dimensions']['width']);
+		$args['height_html'] = udesly_wc_format_dimension($args['dimensions']['height']);
+
+		$args['display_price_html'] = udesly_format_price($args['display_price']);
+
+		$args['display_regular_price_html'] = udesly_format_price($args['display_regular_price']);
+	    return $args;
+    }
 
 	function add_wc_fragments($fragments) {
 
@@ -90,7 +119,9 @@ class WebflowCommerce {
 		// Variation values are shown only if they are not found in the title as of 3.0.
 		// This is because variation titles display the attributes.
 		if ( $cart_item['data']->is_type( 'variation' ) && is_array( $cart_item['variation'] ) ) {
-			foreach ( $cart_item['variation'] as $name => $value ) {
+
+		    foreach ( $cart_item['variation'] as $name => $value ) {
+
 				$taxonomy = wc_attribute_taxonomy_name( str_replace( 'attribute_pa_', '', urldecode( $name ) ) );
 
 				if ( taxonomy_exists( $taxonomy ) ) {
@@ -107,7 +138,7 @@ class WebflowCommerce {
 				}
 
 				// Check the nicename against the title.
-				if ( '' === $value || wc_is_attribute_in_product_name( $value, $cart_item['data']->get_name() ) ) {
+				if ( '' === $value  ) {
 					continue;
 				}
 
@@ -116,6 +147,54 @@ class WebflowCommerce {
 		}
 
 		return $item_data;
+	}
+
+	public static function udesly_add_to_cart() {
+		ob_start();
+
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
+		if ( ! isset( $_POST['product_id'] ) ) {
+			return;
+		}
+
+		$product_id        = apply_filters( 'woocommerce_add_to_cart_product_id', absint( $_POST['product_id'] ) );
+		$product           = wc_get_product( $product_id );
+		$quantity          = empty( $_POST['quantity'] ) ? 1 : wc_stock_amount( wp_unslash( $_POST['quantity'] ) );
+		$passed_validation = apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $quantity );
+		$product_status    = get_post_status( $product_id );
+		$variation_id      = 0;
+		$variation         = array();
+
+		if ( $product && 'variation' === $product->get_type() ) {
+			$variation_id = $product_id;
+			$product_id   = $product->get_parent_id();
+			$variation    = $product->get_variation_attributes();
+		}
+
+		if ( $passed_validation && false !== WC()->cart->add_to_cart( $product_id, $quantity, $variation_id, $variation ) && 'publish' === $product_status ) {
+
+			do_action( 'woocommerce_ajax_added_to_cart', $product_id );
+
+			if ( 'yes' === get_option( 'woocommerce_cart_redirect_after_add' ) ) {
+				wc_add_to_cart_message( array( $product_id => $quantity ), true );
+			}
+
+			\WC_AJAX::get_refreshed_fragments();
+
+		} else {
+
+		    $notices = wc_get_notices('error');
+		    wc_clear_notices();
+			// If there was an error adding to the cart, redirect to the product page to show any errors.
+			$data = array(
+				'error'       => true,
+				'product_url' => apply_filters( 'woocommerce_cart_redirect_after_error', get_permalink( $product_id ), $product_id ),
+                'error_message' => $notices[0]['notice'] ?? __("Failed adding to cart", "woocommerce")
+			);
+
+			wp_send_json( $data );
+		}
+		// phpcs:enable
 	}
 
 	function get_cart_data($expose_product = false) {
@@ -127,7 +206,12 @@ class WebflowCommerce {
 			$_product = apply_filters('woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key);
 			if ($_product && $_product->exists() && $cart_item['quantity'] > 0 && apply_filters('woocommerce_widget_cart_item_visible', true, $cart_item, $cart_item_key)) {
 				$current_product = array();
-				$current_product['title'] = apply_filters('woocommerce_cart_item_name', $_product->get_name(), $cart_item, $cart_item_key);
+				if ($_product->is_type('variation')) {
+					$current_product['title'] = apply_filters('woocommerce_cart_item_name', $_product->get_parent_data()['title'], $cart_item, $cart_item_key);
+				} else {
+					$current_product['title'] = apply_filters('woocommerce_cart_item_name', $_product->get_name(), $cart_item, $cart_item_key);
+				}
+
 
 				$main_image_url = wp_get_attachment_image_url($_product->get_image_id(), 'full');
 				$main_image_url = $main_image_url ? $main_image_url : esc_url(wc_placeholder_img_src());
@@ -145,15 +229,21 @@ class WebflowCommerce {
 				if ($expose_product) {
 					$current_product['product'] = $_product;
 				}
-				$cart_items[] = (object)$current_product;
+				$cart_items[] = (object) $current_product;
+
 			}
 		}
+
+		$notices = wc_get_notices();
+
+		wc_clear_notices();
 
 		return [
 			'count' => $cart->get_cart_contents_count(),
 			'subtotal' => $cart->get_cart_subtotal(),
 			'total' => $cart->get_cart_total(),
-			'items' => $cart_items
+			'items' => $cart_items,
+            'notices' => $notices
 		];
 	}
 }

@@ -23,6 +23,17 @@ if (!function_exists('udesly_get_wc_image')) {
 
 }
 
+if (!function_exists('udesly_format_price')) {
+
+	function udesly_format_price($price) {
+		$price = (float) $price;
+		if($price > 0) {
+			return wc_price($price);
+		}
+		return "";
+	}
+}
+
 if (!function_exists('udesly_get_price')) {
 
 
@@ -33,7 +44,7 @@ if (!function_exists('udesly_get_price')) {
 			$variant = $product;
 		}
 
-		return wc_price($variant->get_price());
+		return udesly_format_price($variant->get_price());
 	}
 
 }
@@ -48,8 +59,10 @@ if (!function_exists('udesly_get_compare_at_price')) {
 		}
 
 		if ($variant->is_on_sale()) {
-			return wc_price($variant->get_regular_price());
+			return udesly_format_price($variant->get_regular_price());
 		}
+
+		return "";
 	}
 }
 
@@ -172,10 +185,19 @@ function udesly_wc_get_quantity_input_value( $product ) {
 	return isset( $_POST['quantity'] ) ? wc_stock_amount( wp_unslash( $_POST['quantity'] ) ) : $product->get_min_purchase_quantity();
 }
 
+function udesly_wc_format_dimension( $dimension ) {
+
+	if ( ! empty( $dimension ) ) {
+		$dimension = wc_format_localized_decimal( $dimension ) . ' ' . get_option( 'woocommerce_dimension_unit' );
+	} else {
+		$dimension = __( 'N/A', 'woocommerce' );
+	}
+
+	return $dimension;
+}
+
 function udesly_wc_get_variable_product_data() {
 	global $product;
-
-	$variation_data = [];
 
 	$get_variations = count( $product->get_children() ) <= apply_filters( 'woocommerce_ajax_variation_threshold', 30, $product );
 
@@ -224,8 +246,6 @@ function udesly_wc_attribute_variations_select( $args = array() ) {
 	$name                  = $args['name'] ? $args['name'] : 'attribute_' . sanitize_title( $attribute );
 	$id                    = $args['id'] ? $args['id'] : sanitize_title( $attribute );
 	$class                 = $args['class'];
-	$show_option_none      = (bool) $args['show_option_none'];
-	$show_option_none_text = $args['show_option_none'] ? $args['show_option_none'] : __( 'Choose an option', 'woocommerce' ); // We'll do our best to hide the placeholder, but we'll need to show something when resetting options.
 
 	if ( empty( $options ) && ! empty( $product ) && ! empty( $attribute ) ) {
 		$attributes = $product->get_variation_attributes();
@@ -234,8 +254,7 @@ function udesly_wc_attribute_variations_select( $args = array() ) {
 
 	$hidden = $args['hidden'] ? 'style="display: none;"' : "";
 
-	$html  = '<select id="' . esc_attr( $id ) . '" class="' . esc_attr( $class ) . '" '. $hidden . ' name="' . esc_attr( $name ) . '" data-attribute_name="attribute_' . esc_attr( sanitize_title( $attribute ) ) . '" data-show_option_none="' . ( $show_option_none ? 'yes' : 'no' ) . '">';
-	$html .= '<option value="">' . esc_html( $show_option_none_text ) . '</option>';
+	$html  = '<select id="' . esc_attr( $id ) . '" class="' . esc_attr( $class ) . '" '. $hidden . ' name="' . esc_attr( $name ) . '" data-attribute_name="attribute_' . esc_attr( sanitize_title( $attribute ) ) . '">';
 
 	$return = [];
 

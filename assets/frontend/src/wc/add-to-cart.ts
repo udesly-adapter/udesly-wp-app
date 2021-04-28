@@ -1,6 +1,8 @@
 import type Udesly from "../utils/udesly";
 import type {WooCommerceRootModel} from "../store/wc-models";
 import {getElementsByDataNodeType} from "../utils/webflow";
+import Variations from "./variations";
+
 
 
 function initAddToCarts(udesly: Udesly<WooCommerceRootModel>) {
@@ -25,6 +27,10 @@ function initAddToCarts(udesly: Udesly<WooCommerceRootModel>) {
                 e.preventDefault();
                 udesly.dispatch('woocommerce/addToCart', {...addToCartForm._udeslyGetData(), type: productType, buyNow: false, el: addToCartForm, submitter: addToCartForm.querySelector('[type="submit"]')})
             })
+        }
+
+        if (productType == "variable") {
+            new Variations(addToCartForm as HTMLFormElement, udesly);
         }
 
         switch (productType) {

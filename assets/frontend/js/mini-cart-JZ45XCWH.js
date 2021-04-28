@@ -221,6 +221,11 @@ var MiniCart = class {
     this.udesly.on("woocommerce/cartChanged", () => {
       this.refreshCart();
     });
+    if (this.openOnProductAdded) {
+      this.udesly.on("woocommerce/addedToCart", () => {
+        this.udesly.dispatch("woocommerce/toggleCart");
+      });
+    }
     this.refreshCart();
   }
   updateCartCount(itemsCount) {
@@ -280,6 +285,18 @@ var MiniCart = class {
         }
       }
     });
+    this.wrapper.addEventListener("change", (e) => {
+      if (e.target.matches(".w-commerce-commercecartquantity")) {
+        const target = e.target;
+        e.target.closest(".w-commerce-commercecartitem")?.classList.add("udy-loading");
+        this.wrapper.querySelector(".w-commerce-commercecartordervalue")?.classList.add("udy-loading");
+        this.udesly.dispatch("woocommerce/updateCartQuantity", {
+          key: target.name,
+          quantity: target.value
+        });
+        e.preventDefault();
+      }
+    });
     getElementsByDataNodeType("commerce-cart-close-link", this.wrapper).forEach((closeLink) => {
       closeLink.addEventListener("click", () => {
         this.udesly.dispatch("woocommerce/toggleCart");
@@ -304,4 +321,4 @@ var mini_cart_default = MiniCart;
 export {
   mini_cart_default as default
 };
-//# sourceMappingURL=mini-cart-KY2IWC7V.js.map
+//# sourceMappingURL=mini-cart-JZ45XCWH.js.map

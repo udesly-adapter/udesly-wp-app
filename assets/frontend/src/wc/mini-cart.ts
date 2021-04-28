@@ -52,6 +52,12 @@ export default class MiniCart {
             this.refreshCart()
         });
 
+        if (this.openOnProductAdded) {
+            this.udesly.on("woocommerce/addedToCart", () => {
+               this.udesly.dispatch("woocommerce/toggleCart");
+            });
+        }
+
         this.refreshCart();
     }
 
@@ -122,6 +128,19 @@ export default class MiniCart {
                 }
             }
         });
+
+        this.wrapper.addEventListener('change', e => {
+            if (e.target.matches('.w-commerce-commercecartquantity')) {
+                const target = e.target;
+                e.target.closest('.w-commerce-commercecartitem')?.classList.add('udy-loading');
+                this.wrapper.querySelector('.w-commerce-commercecartordervalue')?.classList.add('udy-loading');
+                this.udesly.dispatch("woocommerce/updateCartQuantity", {
+                    key: target.name,
+                    quantity: target.value,
+                })
+                e.preventDefault();
+            }
+        })
 
         getElementsByDataNodeType("commerce-cart-close-link", this.wrapper).forEach(closeLink => {
             closeLink.addEventListener("click", () => {
