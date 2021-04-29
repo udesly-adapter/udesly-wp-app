@@ -2,6 +2,7 @@ import type Udesly from "../utils/udesly";
 import type {WooCommerceRootModel} from "../store/wc-models";
 import {getElementsByDataNodeType} from "../utils/webflow";
 import Variations from "./variations";
+import UknownCart from "./unknown-cart";
 
 
 
@@ -47,8 +48,20 @@ function initAddToCarts(udesly: Udesly<WooCommerceRootModel>) {
                 }
                 break;
         }
-
     });
+    const allCarts = Array.from(document.querySelectorAll<HTMLElement>('[data-product-type]')).filter( cart => {
+       return !["simple", "variable", "external"].includes(cart.dataset.productType);
+    });
+    allCarts.forEach( groupedForm => {
+        new UknownCart(groupedForm);
+    });
+
+    // Prevents Form resubmit
+    if (allCarts.length && document.body.classList.contains('single-product')) {
+        if ( window.history.replaceState ) {
+            window.history.replaceState( null, null, window.location.href );
+        }
+    }
 }
 
 export function manageAddToCarts(udesly: Udesly<WooCommerceRootModel>) {

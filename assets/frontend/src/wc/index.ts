@@ -18,6 +18,16 @@ export default async function wc(udesly: Udesly<WooCommerceRootModel>) {
         udesly.dispatch('woocommerce/cartChanged');
     })
 
+    const checkouts = getElementsByDataNodeType("commerce-checkout-form-container");
+
+    if (checkouts) {
+        import("./checkout").then(checkoutModule => {
+            checkouts.forEach(checkout => new checkoutModule.default(udesly, checkout));
+        })
+    }
+
 
     manageAddToCarts(udesly);
+
+    document.body.classList.add('udesly-wc-loaded');
 }

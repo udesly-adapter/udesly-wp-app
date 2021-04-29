@@ -129,6 +129,10 @@ export default class MiniCart {
             }
         });
 
+        this.wrapper.addEventListener('submit', e => {
+            e.preventDefault();
+        })
+
         this.wrapper.addEventListener('change', e => {
             if (e.target.matches('.w-commerce-commercecartquantity')) {
                 const target = e.target;

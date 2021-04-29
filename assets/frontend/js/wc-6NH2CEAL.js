@@ -418,6 +418,36 @@ var Variations = class {
 };
 var variations_default = Variations;
 
+// src/wc/unknown-cart.ts
+var UknownCart = class {
+  constructor(addToCartForm) {
+    this.addToCartForm = addToCartForm;
+    this.addToCartForm.querySelectorAll(".button, .qty").forEach((el) => el.classList.remove("button", "qty"));
+    if (this.addToCartForm.dataset.productType === "grouped") {
+      if (this.addToCartForm.closest(".w-dyn-item")) {
+        this.variationElements = this.addToCartForm.closest(".w-dyn-item").querySelectorAll("[data-variation-prop]");
+      } else {
+        this.variationElements = document.querySelectorAll("[data-variation-prop]:not(.w-dyn-item [data-variation-prop])");
+      }
+      this.variationElements.forEach((el) => {
+        const type = el.dataset.variationProp;
+        if (type.startsWith("display_")) {
+          el.textContent = "";
+        } else if (type.endsWith("_html")) {
+          el.textContent = "N/A";
+        }
+      });
+    }
+    const classes = JSON.parse(this.addToCartForm.dataset.formClasses || "{}");
+    for (let selector in classes) {
+      this.addToCartForm.querySelectorAll(selector).forEach((el) => {
+        el.className += " " + classes[selector];
+      });
+    }
+  }
+};
+var unknown_cart_default = UknownCart;
+
 // src/wc/add-to-cart.ts
 function initAddToCarts(udesly) {
   getElementsByDataNodeType("commerce-add-to-cart-form").forEach((addToCartForm) => {
@@ -457,6 +487,17 @@ function initAddToCarts(udesly) {
         break;
     }
   });
+  const allCarts = Array.from(document.querySelectorAll("[data-product-type]")).filter((cart) => {
+    return !["simple", "variable", "external"].includes(cart.dataset.productType);
+  });
+  allCarts.forEach((groupedForm) => {
+    new unknown_cart_default(groupedForm);
+  });
+  if (allCarts.length && document.body.classList.contains("single-product")) {
+    if (window.history.replaceState) {
+      window.history.replaceState(null, null, window.location.href);
+    }
+  }
 }
 function manageAddToCarts(udesly) {
   initAddToCarts(udesly);
@@ -469,16 +510,23 @@ function manageAddToCarts(udesly) {
 async function wc(udesly) {
   const miniCartsWrappers = getElementsByDataNodeType("commerce-cart-wrapper");
   if (miniCartsWrappers) {
-    import("./mini-cart-JZ45XCWH.js").then((miniCartModule) => {
+    import("./mini-cart-AQCDXLD4.js").then((miniCartModule) => {
       miniCartsWrappers.forEach((wrapper) => new miniCartModule.default(udesly, wrapper));
     });
   }
   onJQueryEvent("wc_fragments_refreshed wc_fragments_loaded", () => {
     udesly.dispatch("woocommerce/cartChanged");
   });
+  const checkouts = getElementsByDataNodeType("commerce-checkout-form-container");
+  if (checkouts) {
+    import("./checkout-ISVL6O44.js").then((checkoutModule) => {
+      checkouts.forEach((checkout) => new checkoutModule.default(udesly, checkout));
+    });
+  }
   manageAddToCarts(udesly);
+  document.body.classList.add("udesly-wc-loaded");
 }
 export {
   wc as default
 };
-//# sourceMappingURL=wc-2FO2JP2Y.js.map
+//# sourceMappingURL=wc-6NH2CEAL.js.map
