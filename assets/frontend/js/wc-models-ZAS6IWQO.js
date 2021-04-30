@@ -17,7 +17,8 @@ var woocommerce = createModel()({
     total: domState.total || "",
     items: domState.items || [],
     notices: domState.notices || [],
-    cartOpen: false
+    cartOpen: false,
+    checkout: domState.checkout || {}
   },
   reducers: {
     toggleCart(state) {
@@ -30,6 +31,7 @@ var woocommerce = createModel()({
     },
     removedFromCart(state, payload) {
       triggerJQuery("removed_from_cart", [payload.fragments, payload.cart_hash]);
+      triggerJQuery("update_checkout");
       return state;
     },
     ajaxError(state, payload) {
@@ -38,10 +40,22 @@ var woocommerce = createModel()({
     },
     addedToCart(state, payload) {
       triggerJQuery("added_to_cart", [payload.fragments, payload.cart_hash]);
+      triggerJQuery("update_checkout");
       return state;
+    },
+    appliedCoupon(state, payload) {
+      triggerJQuery("applied_coupon_in_checkout", [payload.coupon_code]);
+      triggerJQuery("update_checkout", {update_shipping_method: false});
+      if (!state.checkout.coupons) {
+        state.checkout.coupons = [];
+      }
+      console.log(payload.resp);
+      state.checkout.coupons.push(payload);
+      return {...state};
     },
     updatedCartQuantity(state, payload) {
       triggerJQuery("added_to_cart", [payload.fragments, payload.cart_hash]);
+      triggerJQuery("update_checkout");
       return state;
     }
   },
@@ -60,6 +74,21 @@ var woocommerce = createModel()({
         } else {
           dispatch.woocommerce.removedFromCart(respData);
         }
+      } else {
+        dispatch.woocommerce.ajaxError(response.status);
+      }
+    },
+    async applyCoupon(payload, state) {
+      const data = new FormData();
+      data.set("security", wc_checkout_params.apply_coupon_nonce);
+      data.set("coupon_code", payload.coupon_code);
+      const response = await fetch(window.udesly_frontend_options.wc.wc_ajax_url.replace("%%endpoint%%", "apply_coupon"), {
+        method: "POST",
+        body: data
+      });
+      if (response.ok) {
+        const respData = await response.text();
+        dispatch.woocommerce.appliedCoupon({coupon_code: payload.coupon_code, resp: respData});
       } else {
         dispatch.woocommerce.ajaxError(response.status);
       }
@@ -145,4 +174,4 @@ var models = {woocommerce};
 export {
   models
 };
-//# sourceMappingURL=wc-models-RBECXARC.js.map
+//# sourceMappingURL=wc-models-ZAS6IWQO.js.map

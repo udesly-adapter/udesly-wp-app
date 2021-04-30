@@ -1,9 +1,10 @@
 import {
-  onJQueryEvent
-} from "./chunk-4XNJ22UE.js";
-import {
   getElementsByDataNodeType
 } from "./chunk-6B4SAIWY.js";
+import {
+  onJQueryEvent,
+  triggerJQuery
+} from "./chunk-4XNJ22UE.js";
 import {
   __commonJS,
   __toModule
@@ -519,9 +520,13 @@ async function wc(udesly) {
   });
   const checkouts = getElementsByDataNodeType("commerce-checkout-form-container");
   if (checkouts) {
-    import("./checkout-ISVL6O44.js").then((checkoutModule) => {
+    import("./checkout-LL4E5BR6.js").then((checkoutModule) => {
       checkouts.forEach((checkout) => new checkoutModule.default(udesly, checkout));
+      triggerJQuery("init_checkout");
     });
+  } else {
+    wc_checkout_params.is_checkout = "1";
+    triggerJQuery("init_checkout");
   }
   manageAddToCarts(udesly);
   document.body.classList.add("udesly-wc-loaded");
@@ -529,4 +534,4 @@ async function wc(udesly) {
 export {
   wc as default
 };
-//# sourceMappingURL=wc-6NH2CEAL.js.map
+//# sourceMappingURL=wc-FKCPSNL4.js.map

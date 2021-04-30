@@ -1,6 +1,7 @@
 import {
   require_eta
 } from "./chunk-WK2D2ARA.js";
+import "./chunk-4XNJ22UE.js";
 import {
   __toModule
 } from "./chunk-F543FC74.js";
@@ -12,9 +13,20 @@ var Checkout = class {
   constructor(udesly, checkoutWrapper) {
     this.udesly = udesly;
     this.checkoutWrapper = checkoutWrapper;
+    wc_checkout_params.wc_ajax_url += "&udesly_checkout=true";
+    wc_checkout_params.is_checkout = "1";
     this.includeTaxes = window.udesly_frontend_options.wc.show_taxes === "incl";
     this.handleItemsInOrder(this.checkoutWrapper.querySelector(".w-commerce-commercecheckoutblockcontent"));
     this.handleCoupon();
+    this.initDOMEvents();
+  }
+  initDOMEvents() {
+    this.checkoutWrapper.querySelectorAll('[data-node-type="commerce-checkout-place-order-button"]').forEach((el) => {
+      el.addEventListener("click", (e) => {
+        console.log(this.checkoutWrapper);
+        this.checkoutWrapper.dispatchEvent(new Event("submit", {bubbles: true}));
+      });
+    });
   }
   handleCoupon() {
     const couponForm = this.checkoutWrapper.querySelector('[data-node-type="commerce-checkout-discount-form"]');
@@ -30,7 +42,9 @@ var Checkout = class {
         e.preventDefault();
         e.stopPropagation();
         e.stopImmediatePropagation();
-        console.log("submitted");
+        this.udesly.dispatch("woocommerce/applyCoupon", {
+          coupon_code: couponForm.querySelector("input[name=coupon_code]").value
+        });
       }, true);
     }
   }
@@ -67,4 +81,4 @@ var checkout_default = Checkout;
 export {
   checkout_default as default
 };
-//# sourceMappingURL=checkout-ISVL6O44.js.map
+//# sourceMappingURL=checkout-LL4E5BR6.js.map

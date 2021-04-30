@@ -1,7 +1,7 @@
 import type Udesly from "../utils/udesly";
 import type {WooCommerceRootModel} from "../store/wc-models";
 import {getElementsByDataNodeType} from "../utils/webflow";
-import {onJQueryEvent} from "../utils/triggers";
+import {onJQueryEvent, triggerJQuery} from "../utils/triggers";
 import {manageAddToCarts} from "./add-to-cart";
 
 export default async function wc(udesly: Udesly<WooCommerceRootModel>) {
@@ -23,7 +23,11 @@ export default async function wc(udesly: Udesly<WooCommerceRootModel>) {
     if (checkouts) {
         import("./checkout").then(checkoutModule => {
             checkouts.forEach(checkout => new checkoutModule.default(udesly, checkout));
+            triggerJQuery('init_checkout');
         })
+    } else {
+        wc_checkout_params.is_checkout = "1";
+        triggerJQuery('init_checkout');
     }
 
 

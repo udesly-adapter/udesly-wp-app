@@ -50,6 +50,8 @@ class WebflowCommerce {
 
 		add_filter('woocommerce_add_to_cart_fragments', [$this, "add_wc_fragments"], 10, 1);
 
+		add_filter('wc_get_template', [$this, "filter_templates"], 15, 5);
+
 		add_filter('udesly_localize_script_params', function ($array) {
 
 		    $wc = [
@@ -70,7 +72,27 @@ class WebflowCommerce {
 		add_action('wc_ajax_udesly_change_cart_quantity', [self::class, 'udesly_change_cart_quantity']);
 
 		add_filter('woocommerce_available_variation', [$this, 'add_variation_html_data'], 10, 3);
+
+		add_filter('woocommerce_get_script_data', function($params, $handle) {
+
+		    if ($handle == "wc-checkout") {
+		        $params['is_checkout'] = "0";
+            }
+
+		    return $params;
+        }, 10, 2);
 	}
+
+	function filter_templates($template, $template_name, $args, $template_path, $default_path) {
+
+	    if(defined('UDESLY_CHECKOUT') || isset($_GET['udesly_checkout']) && $_GET['udesly_checkout'] == "true" ) {
+	        if (file_exists(STYLESHEETPATH . '/template-parts/woocommerce/' . $template_name) ) {
+	            return STYLESHEETPATH . '/template-parts/woocommerce/' . $template_name;
+            }
+        }
+
+	    return $template;
+    }
 
 	static function udesly_change_cart_quantity() {
 		ob_start();

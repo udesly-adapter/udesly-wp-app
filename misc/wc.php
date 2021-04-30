@@ -105,7 +105,10 @@ if (!function_exists('udesly_get_wc_product_default_variant')) {
 if (!function_exists('udesly_wc_checkout')) {
 
 	function udesly_wc_checkout() {
+
 		global $wp;
+
+		define('UDESLY_CHECKOUT', true);
 
 		// Check cart class is loaded or abort.
 		if ( is_null( WC()->cart ) ) {
@@ -175,12 +178,62 @@ function udesly_wc_order_received( $order_id ) {
 	wc_get_template( 'checkout/thankyou.php', array( 'order' => $order ) );
 }
 
+function udesly_wc_get_order_review_extra_items() {
+
+	$extra_items = [];
+
+	foreach (WC()->cart->get_coupons() as $code => $coupon) {
+		ob_start();
+		wc_cart_totals_coupon_html($coupon);
+		$price = ob_get_clean();
+		$extra_items[] = (object) [
+			'name' => wc_cart_totals_coupon_label($coupon, false),
+			'description' => '',
+			'price' => $price
+		];
+	}
+
+	foreach ( WC()->cart->get_fees() as $fee ) {
+		ob_start();
+		wc_cart_totals_fee_html($fee);
+		$price = ob_get_clean();
+		$extra_items[] = (object) [
+			'name' => $fee->name,
+			'description' => '',
+			'price' => $price
+		];
+	}
+
+	if ( wc_tax_enabled() && ! WC()->cart->display_prices_including_tax()) {
+		if ( 'itemized' === get_option( 'woocommerce_tax_total_display' )) {
+			foreach ( WC()->cart->get_tax_totals() as $code => $tax ) {
+				$extra_items[] = (object) [
+					'name' => $tax->label,
+					'description' => '',
+					'price' => $tax->formatted_amount
+				];
+			}
+		} else {
+			ob_start();
+			wc_cart_totals_taxes_total_html();
+			$price = ob_get_clean();
+			$extra_items[] = (object) [
+				'name' => WC()->countries->tax_or_vat(),
+				'description' => '',
+				'price' => $price
+			];
+		}
+	}
+
+	return $extra_items;
+}
 
 function udesly_wc_show_checkout( ) {
 // Show non-cart errors.
 	do_action( 'woocommerce_before_checkout_form_cart_notices' );
 
 	remove_action( 'woocommerce_before_checkout_form', 'woocommerce_checkout_coupon_form', 10 );
+	remove_action('woocommerce_checkout_order_review', 'woocommerce_checkout_payment', 20);
 
 	// Check cart has contents.
 	if ( WC()->cart->is_empty() && ! is_customize_preview() && apply_filters( 'woocommerce_checkout_redirect_empty_cart', true ) ) {
@@ -208,7 +261,7 @@ function udesly_wc_show_checkout( ) {
 		if (empty($error)) {
 			$error =  __('There are some issues with the items in your cart. Please go back to the cart page and resolve these issues before checking out.', 'woocommerce' );
 		}
-		get_template_part( 'template-parts/woocommerce/checkout-errors', null, array( 'error' => $error ) );
+		wc_get_template( 'checkout/cart-errors.php', array( 'error' => $error  ) );
 		wc_clear_notices();
 
 	} else {
@@ -221,11 +274,11 @@ function udesly_wc_show_checkout( ) {
 
 		if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_required() && ! is_user_logged_in() ) {
 			$error = esc_html( apply_filters( 'woocommerce_checkout_must_be_logged_in_message', __( 'You must be logged in to checkout.', 'woocommerce' ) ) );
-			get_template_part( 'template-parts/woocommerce/checkout-errors', null, array( 'error' => $error ) );
+			wc_get_template( 'checkout/cart-errors.php', array( 'error' => $error  ) );
 			return;
 		}
 
-		get_template_part('template-parts/woocommerce/checkout', null, array('checkout' => $checkout ) );
+		wc_get_template( 'checkout/form-checkout.php', array( 'checkout' => $checkout ) );
 	}
 }
 
