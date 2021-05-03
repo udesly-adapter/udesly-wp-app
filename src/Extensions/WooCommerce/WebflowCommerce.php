@@ -86,9 +86,16 @@ class WebflowCommerce {
 	function filter_templates($template, $template_name, $args, $template_path, $default_path) {
 
 	    if(defined('UDESLY_CHECKOUT') || isset($_GET['udesly_checkout']) && $_GET['udesly_checkout'] == "true" ) {
+	        debug_log($template_name);
 	        if (file_exists(STYLESHEETPATH . '/template-parts/woocommerce/' . $template_name) ) {
 	            return STYLESHEETPATH . '/template-parts/woocommerce/' . $template_name;
             }
+	        if ("notices/error.php" === $template_name) {
+	            return get_template_part('template-parts/woocommerce/checkout/checkout-errors');
+            }
+		    if ("notices/success.php" === $template_name) {
+			    return get_template_part('template-parts/woocommerce/checkout/checkout-success');
+		    }
         }
 
 	    return $template;

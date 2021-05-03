@@ -12,4 +12,4 @@ export {
   triggerJQuery,
   onJQueryEvent
 };
-//# sourceMappingURL=chunk-4XNJ22UE.js.map
+//# sourceMappingURL=chunk-YSIVNBU5.js.map

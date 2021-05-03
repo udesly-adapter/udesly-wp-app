@@ -3,7 +3,7 @@ import {
 } from "./chunk-IPQTGU6P.js";
 import {
   triggerJQuery
-} from "./chunk-4XNJ22UE.js";
+} from "./chunk-YSIVNBU5.js";
 import "./chunk-F543FC74.js";
 
 // src/store/models/wc.ts
@@ -49,14 +49,27 @@ var woocommerce = createModel()({
       if (!state.checkout.coupons) {
         state.checkout.coupons = [];
       }
-      console.log(payload.resp);
       state.checkout.coupons.push(payload);
+      if (state.checkout.coupons.length > 0) {
+        const reviewTable = document.querySelector(".w-commerce-commercecheckoutordersummarywrapper");
+        if (reviewTable) {
+          reviewTable.scrollIntoView({behavior: "smooth", block: "center"});
+        }
+      }
       return {...state};
     },
     updatedCartQuantity(state, payload) {
       triggerJQuery("added_to_cart", [payload.fragments, payload.cart_hash]);
       triggerJQuery("update_checkout");
       return state;
+    },
+    checkoutNotice(state, payload) {
+      return state;
+    },
+    invalidCoupon(state, payload) {
+      console.log(payload);
+      state.checkout.coupons = [];
+      return {...state};
     }
   },
   effects: (dispatch) => ({
@@ -79,15 +92,18 @@ var woocommerce = createModel()({
       }
     },
     async applyCoupon(payload, state) {
+      jQuery && jQuery(".woocommerce-error, .woocommerce-message").remove();
       const data = new FormData();
       data.set("security", wc_checkout_params.apply_coupon_nonce);
       data.set("coupon_code", payload.coupon_code);
-      const response = await fetch(window.udesly_frontend_options.wc.wc_ajax_url.replace("%%endpoint%%", "apply_coupon"), {
+      const response = await fetch(wc_checkout_params.wc_ajax_url.replace("%%endpoint%%", "apply_coupon"), {
         method: "POST",
         body: data
       });
       if (response.ok) {
         const respData = await response.text();
+        dispatch.woocommerce.checkoutNotice(respData);
+        triggerJQuery("update_checkout", {update_shipping_method: false});
         dispatch.woocommerce.appliedCoupon({coupon_code: payload.coupon_code, resp: respData});
       } else {
         dispatch.woocommerce.ajaxError(response.status);
@@ -174,4 +190,4 @@ var models = {woocommerce};
 export {
   models
 };
-//# sourceMappingURL=wc-models-ZAS6IWQO.js.map
+//# sourceMappingURL=wc-models-JVAYKIW7.js.map

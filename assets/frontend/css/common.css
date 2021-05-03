@@ -4,6 +4,8 @@
     --loading-animation: shimmer 2s infinite;
     --loading-opacity: 0.85;
     --table-td-padding: 16px 8px;
+    --success-checkout-notice-background: green;
+    --success-checkout-notice-color: white;
 }
 
 .w-video.w-embed {
@@ -73,4 +75,21 @@ body:not(.udesly-wc-loaded) [data-variation-prop], body:not(.udesly-wc-loaded) f
 
 .w-commerce-commercecheckoutformcontainer {
     min-height: unset;
+}
+
+.woocommerce-NoticeGroup-checkout, [data-node-type="commerce-checkout-error-state"] {
+    display: none;
+}
+
+form [data-node-type="commerce-checkout-error-state"] {
+    display: inherit;
+}
+
+.w-commerce-commercecheckouterrorstate.success {
+    background-color: var(--success-checkout-notice-background);
+    color: var(--success-checkout-notice-color);
+}
+
+ul.w-commerce-commercecheckoutoptionlist {
+    padding-left: 0;
 }

@@ -18,6 +18,16 @@ export default async function wc(udesly: Udesly<WooCommerceRootModel>) {
         udesly.dispatch('woocommerce/cartChanged');
     })
 
+    onJQueryEvent('checkout_error', (event, errors) => {
+        udesly.dispatch('woocommerce/checkoutNotice', errors.toString());
+    })
+
+    onJQueryEvent('ajaxComplete', (event, xhr, config) => {
+        if (config.url.includes('remove_coupon')) {
+               udesly.dispatch('woocommerce/checkoutNotice', xhr.responseText);
+        }
+    }, document)
+
     const checkouts = getElementsByDataNodeType("commerce-checkout-form-container");
 
     if (checkouts) {

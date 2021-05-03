@@ -1,7 +1,7 @@
 import {
   require_eta
 } from "./chunk-WK2D2ARA.js";
-import "./chunk-4XNJ22UE.js";
+import "./chunk-YSIVNBU5.js";
 import {
   __toModule
 } from "./chunk-F543FC74.js";
@@ -14,19 +14,45 @@ var Checkout = class {
     this.udesly = udesly;
     this.checkoutWrapper = checkoutWrapper;
     wc_checkout_params.wc_ajax_url += "&udesly_checkout=true";
+    wc_checkout_params.checkout_url += "&udesly_checkout=true";
     wc_checkout_params.is_checkout = "1";
+    jQuery.scroll_to_notices = () => {
+      const errorState = this.checkoutWrapper.querySelector('[data-node-type="commerce-checkout-error-state"]');
+      if (errorState) {
+        errorState.scrollIntoView({block: "center", behavior: "smooth"});
+      }
+    };
     this.includeTaxes = window.udesly_frontend_options.wc.show_taxes === "incl";
     this.handleItemsInOrder(this.checkoutWrapper.querySelector(".w-commerce-commercecheckoutblockcontent"));
     this.handleCoupon();
     this.initDOMEvents();
+    this.initStoreEvents();
   }
   initDOMEvents() {
     this.checkoutWrapper.querySelectorAll('[data-node-type="commerce-checkout-place-order-button"]').forEach((el) => {
       el.addEventListener("click", (e) => {
-        console.log(this.checkoutWrapper);
         this.checkoutWrapper.dispatchEvent(new Event("submit", {bubbles: true}));
       });
     });
+    this.checkoutWrapper.addEventListener("change", () => {
+      this.hideErrorState();
+    });
+  }
+  initStoreEvents() {
+    this.udesly.on("woocommerce/checkoutNotice", (errors) => {
+      this.checkoutWrapper.querySelectorAll(".woocommerce-NoticeGroup-checkout").forEach((el) => el.remove());
+      const errorState = this.checkoutWrapper.querySelector('[data-node-type="commerce-checkout-error-state"]');
+      if (errorState) {
+        errorState.outerHTML = errors;
+        errorState.scrollIntoView({block: "center", behavior: "smooth"});
+      }
+    });
+  }
+  hideErrorState() {
+    const errorState = this.checkoutWrapper.querySelector('[data-node-type="commerce-checkout-error-state"]');
+    if (errorState) {
+      errorState.style.display = "none";
+    }
   }
   handleCoupon() {
     const couponForm = this.checkoutWrapper.querySelector('[data-node-type="commerce-checkout-discount-form"]');
@@ -39,6 +65,7 @@ var Checkout = class {
     }
     if (realCouponForm) {
       realCouponForm.addEventListener("submit", (e) => {
+        this.hideErrorState();
         e.preventDefault();
         e.stopPropagation();
         e.stopImmediatePropagation();
@@ -81,4 +108,4 @@ var checkout_default = Checkout;
 export {
   checkout_default as default
 };
-//# sourceMappingURL=checkout-LL4E5BR6.js.map
+//# sourceMappingURL=checkout-FXOMMUOT.js.map

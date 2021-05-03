@@ -14,22 +14,54 @@ export default class Checkout {
     constructor(private udesly: Udesly<WooCommerceRootModel>, private checkoutWrapper: HTMLElement) {
 
         wc_checkout_params.wc_ajax_url+="&udesly_checkout=true"
+        wc_checkout_params.checkout_url+="&udesly_checkout=true"
         wc_checkout_params.is_checkout = "1";
+
+        jQuery.scroll_to_notices =  () => {
+            const errorState = this.checkoutWrapper.querySelector('[data-node-type="commerce-checkout-error-state"]');
+            if (errorState) {
+                errorState.scrollIntoView({block: "center", behavior: "smooth"})
+            }
+        }
         this.includeTaxes = window.udesly_frontend_options.wc.show_taxes === "incl";
         this.handleItemsInOrder(this.checkoutWrapper.querySelector(".w-commerce-commercecheckoutblockcontent"));
 
         this.handleCoupon();
 
         this.initDOMEvents();
+
+        this.initStoreEvents();
     }
 
     initDOMEvents() {
         this.checkoutWrapper.querySelectorAll('[data-node-type="commerce-checkout-place-order-button"]').forEach(el => {
             el.addEventListener('click', e => {
-                console.log(this.checkoutWrapper);
                 this.checkoutWrapper.dispatchEvent(new Event('submit', {bubbles: true}))
             })
         })
+        this.checkoutWrapper.addEventListener('change', () => {
+            this.hideErrorState();
+        })
+    }
+
+    initStoreEvents() {
+        this.udesly.on('woocommerce/checkoutNotice', (errors) => {
+            this.checkoutWrapper.querySelectorAll('.woocommerce-NoticeGroup-checkout').forEach(el => el.remove());
+            const errorState = this.checkoutWrapper.querySelector('[data-node-type="commerce-checkout-error-state"]');
+
+            if (errorState) {
+                errorState.outerHTML = errors;
+               errorState.scrollIntoView({block: "center", behavior: "smooth"})
+            }
+        })
+    }
+
+    hideErrorState() {
+        const errorState = this.checkoutWrapper.querySelector<HTMLElement>('[data-node-type="commerce-checkout-error-state"]');
+
+        if (errorState) {
+            errorState.style.display = "none";
+        }
     }
 
     handleCoupon() {
@@ -44,6 +76,7 @@ export default class Checkout {
 
         if (realCouponForm) {
            realCouponForm.addEventListener('submit', e => {
+               this.hideErrorState();
                e.preventDefault();
                e.stopPropagation();
                e.stopImmediatePropagation();

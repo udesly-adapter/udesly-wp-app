@@ -8,6 +8,6 @@ export function triggerJQuery(event, data = null) {
     )
 }
 
-export function onJQueryEvent(event, callback, target = document.body) {
+export function onJQueryEvent(event, callback, target: any = document.body) {
     jQuery(target).on(event, callback);
 }
