@@ -81,12 +81,19 @@ class WebflowCommerce {
 
 		    return $params;
         }, 10, 2);
+
+		add_action('wp_enqueue_scripts', function () {
+			wp_dequeue_style( 'selectWoo' );
+			wp_deregister_style( 'selectWoo' );
+
+			wp_dequeue_script( 'selectWoo');
+			wp_deregister_script('selectWoo');
+        }, 10);
 	}
 
 	function filter_templates($template, $template_name, $args, $template_path, $default_path) {
 
 	    if(defined('UDESLY_CHECKOUT') || isset($_GET['udesly_checkout']) && $_GET['udesly_checkout'] == "true" ) {
-	        debug_log($template_name);
 	        if (file_exists(STYLESHEETPATH . '/template-parts/woocommerce/' . $template_name) ) {
 	            return STYLESHEETPATH . '/template-parts/woocommerce/' . $template_name;
             }

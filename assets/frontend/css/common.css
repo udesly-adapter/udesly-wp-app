@@ -93,3 +93,7 @@ form [data-node-type="commerce-checkout-error-state"] {
 ul.w-commerce-commercecheckoutoptionlist {
     padding-left: 0;
 }
+
+abbr[title] {
+    border-bottom: none;
+}
