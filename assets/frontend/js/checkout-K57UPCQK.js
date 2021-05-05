@@ -1,7 +1,9 @@
 import {
   require_eta
 } from "./chunk-WK2D2ARA.js";
-import "./chunk-YSIVNBU5.js";
+import {
+  onJQueryEvent
+} from "./chunk-YSIVNBU5.js";
 import {
   __toModule
 } from "./chunk-F543FC74.js";
@@ -39,6 +41,9 @@ var Checkout = class {
     });
   }
   initStoreEvents() {
+    onJQueryEvent("update_checkout", () => {
+      this.udesly.dispatch("woocommerce/updateCheckout");
+    });
     this.udesly.on("woocommerce/checkoutNotice", (errors) => {
       this.checkoutWrapper.querySelectorAll(".woocommerce-NoticeGroup-checkout").forEach((el) => el.remove());
       const errorState = this.checkoutWrapper.querySelector('[data-node-type="commerce-checkout-error-state"]');
@@ -108,4 +113,4 @@ var checkout_default = Checkout;
 export {
   checkout_default as default
 };
-//# sourceMappingURL=checkout-FXOMMUOT.js.map
+//# sourceMappingURL=checkout-K57UPCQK.js.map

@@ -524,11 +524,13 @@ async function wc(udesly) {
   onJQueryEvent("ajaxComplete", (event, xhr, config) => {
     if (config.url.includes("remove_coupon")) {
       udesly.dispatch("woocommerce/checkoutNotice", xhr.responseText);
+    } else if (config.url.includes("update_order_review")) {
+      udesly.dispatch("woocommerce/checkoutUpdated");
     }
   }, document);
   const checkouts = getElementsByDataNodeType("commerce-checkout-form-container");
   if (checkouts) {
-    import("./checkout-FXOMMUOT.js").then((checkoutModule) => {
+    import("./checkout-K57UPCQK.js").then((checkoutModule) => {
       checkouts.forEach((checkout) => new checkoutModule.default(udesly, checkout));
       triggerJQuery("init_checkout");
     });
@@ -542,4 +544,4 @@ async function wc(udesly) {
 export {
   wc as default
 };
-//# sourceMappingURL=wc-AFTR2KPK.js.map
+//# sourceMappingURL=wc-63EJN5KF.js.map

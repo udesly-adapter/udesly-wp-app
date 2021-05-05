@@ -52,6 +52,25 @@ class WebflowCommerce {
 
 		add_filter('wc_get_template', [$this, "filter_templates"], 15, 5);
 
+		add_filter('woocommerce_checkout_fields', function ($fields) {
+		    if (defined('UDESLY_CHECKOUT') || isset($_GET['udesly_checkout'])) {
+			   $fields['customer'] = [];
+			   $billing_email = $fields['billing']['billing_email'];
+			   unset($fields['billing']['billing_email']);
+			    if (is_user_logged_in()) {
+			        if (!isset($billing_email['custom_attributes'])) {
+			            $billing_email['custom_attributes'] = [];
+                    }
+                    $billing_email['custom_attributes']['readonly'] = true;
+			    }
+			   $fields['customer']['billing_email'] = $billing_email;
+
+            }
+			return $fields;
+        }, 10);
+
+		add_filter('woocommerce_update_order_review_fragments', [$this, 'add_update_order_fragments'], 10, 1);
+
 		add_filter('udesly_localize_script_params', function ($array) {
 
 		    $wc = [
@@ -91,12 +110,25 @@ class WebflowCommerce {
         }, 10);
 	}
 
+	function add_update_order_fragments( $fragments ) {
+
+	    ob_start();
+		wc_cart_totals_shipping_html();
+		$fragment = ob_get_clean();
+
+	    $fragments['[data-node-type="commerce-checkout-shipping-methods-wrapper"] fieldset'] = $fragment;
+
+	    return $fragments;
+    }
+
 	function filter_templates($template, $template_name, $args, $template_path, $default_path) {
 
 	    if(defined('UDESLY_CHECKOUT') || isset($_GET['udesly_checkout']) && $_GET['udesly_checkout'] == "true" ) {
+
 	        if (file_exists(STYLESHEETPATH . '/template-parts/woocommerce/' . $template_name) ) {
 	            return STYLESHEETPATH . '/template-parts/woocommerce/' . $template_name;
             }
+
 	        if ("notices/error.php" === $template_name) {
 	            return get_template_part('template-parts/woocommerce/checkout/checkout-errors');
             }

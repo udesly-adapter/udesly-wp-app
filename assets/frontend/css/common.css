@@ -96,4 +96,31 @@ ul.w-commerce-commercecheckoutoptionlist {
 
 abbr[title] {
     border-bottom: none;
+    text-decoration: none;
+}
+
+body.woocommerce-page form .form-row label.woocommerce-form__label-for-checkbox {
+    display: flex;
+    align-items: center;
+}
+
+.woocommerce-checkout #payment .wc_payment_method .payment_box {
+    background-color: inherit;
+    color: inherit;
+    padding-left: 0;
+}
+.woocommerce-checkout #payment .wc_payment_method .payment_box::before {
+    display: none;
+}
+
+.about_paypal {
+    display: none;
+}
+
+.chosen .about_paypal {
+    display: inherit;
+}
+
+.updating-checkout .about_paypal {
+    display: none;
 }

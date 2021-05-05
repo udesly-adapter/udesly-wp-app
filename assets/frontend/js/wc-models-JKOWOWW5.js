@@ -58,6 +58,14 @@ var woocommerce = createModel()({
       }
       return {...state};
     },
+    updateCheckout(state) {
+      document.body.classList.add("updating-checkout");
+      return state;
+    },
+    checkoutUpdated(state) {
+      document.body.classList.remove("updating-checkout");
+      return state;
+    },
     updatedCartQuantity(state, payload) {
       triggerJQuery("added_to_cart", [payload.fragments, payload.cart_hash]);
       triggerJQuery("update_checkout");
@@ -190,4 +198,4 @@ var models = {woocommerce};
 export {
   models
 };
-//# sourceMappingURL=wc-models-JVAYKIW7.js.map
+//# sourceMappingURL=wc-models-JKOWOWW5.js.map

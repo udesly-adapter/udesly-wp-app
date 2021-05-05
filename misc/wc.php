@@ -106,6 +106,18 @@ if (!function_exists('udesly_wc_checkout')) {
 
 	function udesly_wc_checkout() {
 
+		?>
+		<script>
+		jQuery(document.body).on('update_checkout', function(e) {
+			if (wc_checkout_params.is_checkout === "0") {
+			    e.preventDefault();
+			    e.stopPropagation();
+			    e.stopImmediatePropagation();
+			}
+		});
+		</script>
+<?php
+
 		global $wp;
 
 		define('UDESLY_CHECKOUT', true);
@@ -204,6 +216,26 @@ function udesly_wc_get_order_review_extra_items() {
 		];
 	}
 
+	$packages = WC()->shipping()->get_packages();
+
+
+	foreach ( $packages as $i => $package ) {
+		$chosen_method = isset( WC()->session->chosen_shipping_methods[ $i ] ) ? WC()->session->chosen_shipping_methods[ $i ] : '';
+
+
+		$available_methods = $package['rates'];
+
+		if (isset($available_methods[$chosen_method])) {
+		    $method = $available_methods[$chosen_method];
+			$extra_items[] = (object) [
+				'name' => $method->get_label(),
+				'description' => '',
+				'price' => $method->cost > 0 ? wc_price($method->cost) : "",
+			];
+        }
+
+	}
+
 	if ( wc_tax_enabled() && ! WC()->cart->display_prices_including_tax()) {
 		if ( 'itemized' === get_option( 'woocommerce_tax_total_display' )) {
 			foreach ( WC()->cart->get_tax_totals() as $code => $tax ) {
@@ -226,6 +258,56 @@ function udesly_wc_get_order_review_extra_items() {
 	}
 
 	return $extra_items;
+}
+
+function udesly_wc_itemize_gateway($gateway) {
+
+    $gateway->name = $gateway->get_title();
+
+    $gateway->price = '<div class="payment_method_image">' . $gateway->get_icon() . '</div>';
+
+    ob_start();
+	if ( $gateway->has_fields() || $gateway->get_description() ) : ?>
+        <div class="payment_box payment_method_<?php echo esc_attr( $gateway->id ); ?> <?php echo $gateway->chosen ? 'chosen' : ''; ?>" <?php if ( ! $gateway->chosen ) : ?>style="display:none;"<?php endif; ?>>
+			<?php $gateway->payment_fields(); ?>
+        </div>
+	<?php endif;
+	$gateway->description = ob_get_clean();
+
+    return $gateway;
+}
+
+function udesly_wc_account_fields($checkout, $label_class, $input_class) {
+	if ( ! is_user_logged_in() && $checkout->is_registration_enabled() ) : ?>
+        <div class="woocommerce-account-fields">
+			<?php if ( ! $checkout->is_registration_required() ) : ?>
+
+                <p class="form-row form-row-wide create-account">
+                    <label class="woocommerce-form__label woocommerce-form__label-for-checkbox checkbox">
+                        <input class="woocommerce-form__input woocommerce-form__input-checkbox input-checkbox" id="createaccount" <?php checked( ( true === $checkout->get_value( 'createaccount' ) || ( true === apply_filters( 'woocommerce_create_account_default_checked', false ) ) ), true ); ?> type="checkbox" name="createaccount" value="1" /> <span><?php esc_html_e( 'Create an account?', 'woocommerce' ); ?></span>
+                    </label>
+                </p>
+
+			<?php endif; ?>
+
+			<?php do_action( 'woocommerce_before_checkout_registration_form', $checkout ); ?>
+
+			<?php if ( $checkout->get_checkout_fields( 'account' ) ) : ?>
+
+                <div class="create-account">
+					<?php foreach ( $checkout->get_checkout_fields( 'account' ) as $key => $field ) {
+						$field['label_class'][] = $label_class;
+						$field['input_class'][] = $input_class;
+						woocommerce_form_field( $key, $field, $checkout->get_value( $key ) );
+                    } ?>
+                    <div class="clear"></div>
+                </div>
+
+			<?php endif; ?>
+
+			<?php do_action( 'woocommerce_after_checkout_registration_form', $checkout ); ?>
+        </div>
+	<?php endif;
 }
 
 function udesly_wc_show_checkout( ) {

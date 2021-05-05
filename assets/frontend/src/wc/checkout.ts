@@ -1,7 +1,7 @@
 import type Udesly from "../utils/udesly";
 import type {WooCommerceRootModel} from "../store/wc-models";
 import Eta from '../utils/eta';
-import {triggerJQuery} from "../utils/triggers";
+import {onJQueryEvent, triggerJQuery} from "../utils/triggers";
 
 Eta.config.autoEscape = false;
 
@@ -45,6 +45,11 @@ export default class Checkout {
     }
 
     initStoreEvents() {
+
+        onJQueryEvent('update_checkout', () => {
+            this.udesly.dispatch('woocommerce/updateCheckout');
+        })
+
         this.udesly.on('woocommerce/checkoutNotice', (errors) => {
             this.checkoutWrapper.querySelectorAll('.woocommerce-NoticeGroup-checkout').forEach(el => el.remove());
             const errorState = this.checkoutWrapper.querySelector('[data-node-type="commerce-checkout-error-state"]');

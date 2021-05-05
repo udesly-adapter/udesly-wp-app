@@ -25,6 +25,8 @@ export default async function wc(udesly: Udesly<WooCommerceRootModel>) {
     onJQueryEvent('ajaxComplete', (event, xhr, config) => {
         if (config.url.includes('remove_coupon')) {
                udesly.dispatch('woocommerce/checkoutNotice', xhr.responseText);
+        } else if (config.url.includes('update_order_review')) {
+            udesly.dispatch('woocommerce/checkoutUpdated');
         }
     }, document)
 
