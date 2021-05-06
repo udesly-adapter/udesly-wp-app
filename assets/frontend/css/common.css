@@ -115,6 +115,7 @@ body.woocommerce-page form .form-row label.woocommerce-form__label-for-checkbox 
 
 .about_paypal {
     display: none;
+    white-space: nowrap;
 }
 
 .chosen .about_paypal {
@@ -123,4 +124,11 @@ body.woocommerce-page form .form-row label.woocommerce-form__label-for-checkbox 
 
 .updating-checkout .about_paypal {
     display: none;
+}
+
+[data-node-type="commerce-checkout-shipping-methods-list"] li {
+    display: block;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
 }

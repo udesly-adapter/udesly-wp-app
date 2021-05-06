@@ -50,7 +50,14 @@ class WebflowCommerce {
 
 		add_filter('woocommerce_add_to_cart_fragments', [$this, "add_wc_fragments"], 10, 1);
 
-		add_filter('wc_get_template', [$this, "filter_templates"], 15, 5);
+		add_filter('template_include', function($template) {
+		   if (is_order_received_page() && file_exists(STYLESHEETPATH . '/thank-you.php')) {
+		      return STYLESHEETPATH . '/thank-you.php';
+           }
+		   return $template;
+        });
+
+		add_filter('wc_get_template', [$this, "filter_templates"], 1, 5);
 
 		add_filter('woocommerce_checkout_fields', function ($fields) {
 		    if (defined('UDESLY_CHECKOUT') || isset($_GET['udesly_checkout'])) {
@@ -123,17 +130,19 @@ class WebflowCommerce {
 
 	function filter_templates($template, $template_name, $args, $template_path, $default_path) {
 
+
 	    if(defined('UDESLY_CHECKOUT') || isset($_GET['udesly_checkout']) && $_GET['udesly_checkout'] == "true" ) {
 
 	        if (file_exists(STYLESHEETPATH . '/template-parts/woocommerce/' . $template_name) ) {
 	            return STYLESHEETPATH . '/template-parts/woocommerce/' . $template_name;
             }
 
+
 	        if ("notices/error.php" === $template_name) {
-	            return get_template_part('template-parts/woocommerce/checkout/checkout-errors');
+	            return STYLESHEETPATH . '/template-parts/woocommerce/checkout/checkout-errors.php';
             }
 		    if ("notices/success.php" === $template_name) {
-			    return get_template_part('template-parts/woocommerce/checkout/checkout-success');
+			    return STYLESHEETPATH . '/template-parts/woocommerce/checkout/checkout-success.php';
 		    }
         }
 
@@ -181,41 +190,6 @@ class WebflowCommerce {
 <?php
 	}
 
-	function get_cart_item_options($cart_item) {
-		$item_data = array();
-
-		// Variation values are shown only if they are not found in the title as of 3.0.
-		// This is because variation titles display the attributes.
-		if ( $cart_item['data']->is_type( 'variation' ) && is_array( $cart_item['variation'] ) ) {
-
-		    foreach ( $cart_item['variation'] as $name => $value ) {
-
-				$taxonomy = wc_attribute_taxonomy_name( str_replace( 'attribute_pa_', '', urldecode( $name ) ) );
-
-				if ( taxonomy_exists( $taxonomy ) ) {
-					// If this is a term slug, get the term's nice name.
-					$term = get_term_by( 'slug', $value, $taxonomy );
-					if ( ! is_wp_error( $term ) && $term && $term->name ) {
-						$value = $term->name;
-					}
-					$label = wc_attribute_label( $taxonomy );
-				} else {
-					// If this is a custom option slug, get the options name.
-					$value = apply_filters( 'woocommerce_variation_option_name', $value, null, $taxonomy, $cart_item['data'] );
-					$label = wc_attribute_label( str_replace( 'attribute_', '', $name ), $cart_item['data'] );
-				}
-
-				// Check the nicename against the title.
-				if ( '' === $value  ) {
-					continue;
-				}
-
-				$item_data[$label] = $value;
-			}
-		}
-
-		return $item_data;
-	}
 
 	public static function udesly_add_to_cart() {
 		ob_start();
@@ -293,7 +267,7 @@ class WebflowCommerce {
 				$current_product['subtotal'] = wc_price($cart_item['line_total']);
 				$current_product['total'] = wc_price($cart_item['line_total'] + $cart_item['line_tax']);
 				$current_product['key'] = $cart_item_key;
-				$current_product['options'] = $this->get_cart_item_options($cart_item);
+				$current_product['options'] = udesly_wc_get_cart_item_options($cart_item);
 				if ($expose_product) {
 					$current_product['product'] = $_product;
 				}

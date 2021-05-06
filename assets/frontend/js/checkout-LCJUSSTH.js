@@ -49,7 +49,9 @@ var Checkout = class {
       const errorState = this.checkoutWrapper.querySelector('[data-node-type="commerce-checkout-error-state"]');
       if (errorState) {
         errorState.outerHTML = errors;
-        errorState.scrollIntoView({block: "center", behavior: "smooth"});
+        requestAnimationFrame(() => {
+          this.checkoutWrapper.querySelector('[data-node-type="commerce-checkout-error-state"]').scrollIntoView({block: "center", behavior: "smooth"});
+        });
       }
     });
   }
@@ -113,4 +115,4 @@ var checkout_default = Checkout;
 export {
   checkout_default as default
 };
-//# sourceMappingURL=checkout-K57UPCQK.js.map
+//# sourceMappingURL=checkout-LCJUSSTH.js.map

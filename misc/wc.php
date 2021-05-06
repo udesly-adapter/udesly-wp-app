@@ -190,6 +190,137 @@ function udesly_wc_order_received( $order_id ) {
 	wc_get_template( 'checkout/thankyou.php', array( 'order' => $order ) );
 }
 
+function udesly_wc_get_order_items_script($order) {
+
+	$cart_items = [];
+	foreach ($order->get_items() as $cart_item_key => $cart_item) {
+
+		$_product = $cart_item['variation_id'] ? wc_get_product($cart_item['variation_id']) : wc_get_product($cart_item['product_id']);
+
+		if ($_product) {
+			if ($_product->is_type('variation')) {
+				$current_product['title'] = $_product->get_parent_data()['title'];
+			} else {
+				$current_product['title'] =  $_product->get_name();
+			}
+
+			$main_image_url = wp_get_attachment_image_url($_product->get_image_id(), 'full');
+			$main_image_url = $main_image_url ? $main_image_url : esc_url(wc_placeholder_img_src());
+			$current_product['image'] = $main_image_url;
+
+			$product_price = apply_filters('woocommerce_cart_item_price', WC()->cart->get_product_price($_product), $cart_item, $cart_item_key);
+			$current_product['permalink'] = apply_filters('woocommerce_cart_item_permalink', $_product->is_visible() ? $_product->get_permalink($cart_item) : '', $cart_item, $cart_item_key);
+			$current_product['remove_url'] = wc_get_cart_remove_url($cart_item_key);
+			$current_product['quantity'] = $cart_item['quantity'];
+			$current_product['price'] = $product_price;
+			$current_product['subtotal'] = wc_price($cart_item['line_total']);
+			$current_product['total'] = wc_price($cart_item['line_total'] + $cart_item['line_tax']);
+			$current_product['key'] = $cart_item_key;
+			$current_product['options'] = $_product->is_type('variation') ? $_product->get_attribute_summary() : "";
+
+			$cart_items[] = (object) $current_product;
+
+		}
+	}
+
+    echo "<script type='application/json' data-type='order-items-data'>". json_encode($cart_items) . "</script>";
+}
+
+function udesly_wc_get_cart_item_options($cart_item) {
+	$item_data = array();
+
+	// Variation values are shown only if they are not found in the title as of 3.0.
+	// This is because variation titles display the attributes.
+	if ( $cart_item['data']->is_type( 'variation' ) && is_array( $cart_item['variation'] ) ) {
+
+		foreach ( $cart_item['variation'] as $name => $value ) {
+
+			$taxonomy = wc_attribute_taxonomy_name( str_replace( 'attribute_pa_', '', urldecode( $name ) ) );
+
+			if ( taxonomy_exists( $taxonomy ) ) {
+				// If this is a term slug, get the term's nice name.
+				$term = get_term_by( 'slug', $value, $taxonomy );
+				if ( ! is_wp_error( $term ) && $term && $term->name ) {
+					$value = $term->name;
+				}
+				$label = wc_attribute_label( $taxonomy );
+			} else {
+				// If this is a custom option slug, get the options name.
+				$value = apply_filters( 'woocommerce_variation_option_name', $value, null, $taxonomy, $cart_item['data'] );
+				$label = wc_attribute_label( str_replace( 'attribute_', '', $name ), $cart_item['data'] );
+			}
+
+			// Check the nicename against the title.
+			if ( '' === $value  ) {
+				continue;
+			}
+
+			$item_data[$label] = $value;
+		}
+	}
+
+	return $item_data;
+}
+
+function udesly_wc_get_shipping_methods( $order, $with_taxes = false ) {
+
+    $result = [];
+    $methods = $order->get_shipping_methods();
+
+    foreach ($methods as $method) {
+        $title = $method->get_method_title();
+        $result[] = (object) [
+          'name' => $title,
+          'price' => $method->get_total() > 0 ? wc_price($method->get_total()) : ''
+        ];
+
+        if ($with_taxes) {
+           $taxes = $order->get_taxes();
+           $tax = array_shift($taxes);
+           if (isset($tax) && $method->get_total_tax() > 0) {
+
+		        $result[] = (object) [
+			        'name' => $title . " (" . $tax->get_label() . ")",
+			        'price' => wc_price($method->get_total_tax()),
+		        ];
+            }
+        }
+
+    }
+
+    return $result;
+}
+
+function udesly_wc_get_order_extra_items($order) {
+
+    $extra_items = udesly_wc_get_shipping_methods($order, true);
+
+    foreach ($order->get_fees() as $fee) {
+	    $extra_items[] = (object) [
+		    'name' => $fee->get_name(),
+		    'price' => $fee->get_total() > 0 ? wc_price($fee->get_total()) : '',
+	    ];
+    }
+
+    foreach ($order->get_taxes() as $tax) {
+	    $extra_items[] = (object) [
+		    'name' => $tax->get_label(),
+		    'price' => $tax->get_tax_total() > 0 ? wc_price($tax->get_tax_total()) : '',
+	    ];
+    }
+
+    foreach ($order->get_coupons() as $coupon) {
+	    $extra_items[] = (object) [
+		    'name' => $coupon->get_name(),
+		    'price' => "-" . wc_price($coupon->get_discount()),
+	    ];
+    }
+
+
+
+    return $extra_items;
+}
+
 function udesly_wc_get_order_review_extra_items() {
 
 	$extra_items = [];
@@ -338,8 +469,10 @@ function udesly_wc_show_checkout( ) {
 		try {
 			$error = $errors[0]['message'];
 		} catch (\Exception $e) {
+
 			$error = "";
 		}
+
 		if (empty($error)) {
 			$error =  __('There are some issues with the items in your cart. Please go back to the cart page and resolve these issues before checking out.', 'woocommerce' );
 		}
@@ -348,6 +481,7 @@ function udesly_wc_show_checkout( ) {
 
 	} else {
 
+
 		$non_js_checkout = ! empty( $_POST['woocommerce_checkout_update_totals'] ); // WPCS: input var ok, CSRF ok.
 
 		if ( wc_notice_count( 'error' ) === 0 && $non_js_checkout ) {
@@ -355,7 +489,7 @@ function udesly_wc_show_checkout( ) {
 		}
 
 		if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_required() && ! is_user_logged_in() ) {
-			$error = esc_html( apply_filters( 'woocommerce_checkout_must_be_logged_in_message', __( 'You must be logged in to checkout.', 'woocommerce' ) ) );
+		    $error = esc_html( apply_filters( 'woocommerce_checkout_must_be_logged_in_message', __( 'You must be logged in to checkout.', 'woocommerce' ) ) );
 			wc_get_template( 'checkout/cart-errors.php', array( 'error' => $error  ) );
 			return;
 		}

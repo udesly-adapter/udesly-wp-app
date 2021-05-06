@@ -527,10 +527,17 @@ async function wc(udesly) {
     } else if (config.url.includes("update_order_review")) {
       udesly.dispatch("woocommerce/checkoutUpdated");
     }
+    if (document.querySelector(".woocommerce-notices-wrapper")) {
+      const noticesWrapper = document.querySelector(".woocommerce-notices-wrapper");
+      if (noticesWrapper.innerHTML.trim().length > 0) {
+        udesly.dispatch("woocommerce/checkoutNotice", noticesWrapper.innerHTML);
+        noticesWrapper.innerHTML = "";
+      }
+    }
   }, document);
   const checkouts = getElementsByDataNodeType("commerce-checkout-form-container");
   if (checkouts) {
-    import("./checkout-K57UPCQK.js").then((checkoutModule) => {
+    import("./checkout-LCJUSSTH.js").then((checkoutModule) => {
       checkouts.forEach((checkout) => new checkoutModule.default(udesly, checkout));
       triggerJQuery("init_checkout");
     });
@@ -538,10 +545,16 @@ async function wc(udesly) {
     wc_checkout_params.is_checkout = "1";
     triggerJQuery("init_checkout");
   }
+  const thankyous = document.querySelectorAll('[data-node-type="commerce-order-confirmation-wrapper"] .w-commerce-commercecheckoutorderitemswrapper');
+  if (thankyous) {
+    import("./thankyou-II57NWZI.js").then((module) => {
+      thankyous.forEach((thankyou) => new module.default(thankyou));
+    });
+  }
   manageAddToCarts(udesly);
   document.body.classList.add("udesly-wc-loaded");
 }
 export {
   wc as default
 };
-//# sourceMappingURL=wc-63EJN5KF.js.map
+//# sourceMappingURL=wc-FPEG67BG.js.map

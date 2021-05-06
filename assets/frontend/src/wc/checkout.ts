@@ -56,7 +56,10 @@ export default class Checkout {
 
             if (errorState) {
                 errorState.outerHTML = errors;
-               errorState.scrollIntoView({block: "center", behavior: "smooth"})
+                requestAnimationFrame(() => {
+                    this.checkoutWrapper.querySelector('[data-node-type="commerce-checkout-error-state"]').scrollIntoView({block: "center", behavior: "smooth"})
+                })
+
             }
         })
     }

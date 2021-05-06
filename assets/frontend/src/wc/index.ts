@@ -28,6 +28,13 @@ export default async function wc(udesly: Udesly<WooCommerceRootModel>) {
         } else if (config.url.includes('update_order_review')) {
             udesly.dispatch('woocommerce/checkoutUpdated');
         }
+        if (document.querySelector('.woocommerce-notices-wrapper')) {
+            const noticesWrapper = document.querySelector('.woocommerce-notices-wrapper');
+            if (noticesWrapper.innerHTML.trim().length > 0) {
+                udesly.dispatch('woocommerce/checkoutNotice', noticesWrapper.innerHTML);
+                noticesWrapper.innerHTML = "";
+            }
+        }
     }, document)
 
     const checkouts = getElementsByDataNodeType("commerce-checkout-form-container");
@@ -36,12 +43,23 @@ export default async function wc(udesly: Udesly<WooCommerceRootModel>) {
         import("./checkout").then(checkoutModule => {
             checkouts.forEach(checkout => new checkoutModule.default(udesly, checkout));
             triggerJQuery('init_checkout');
+
         })
     } else {
         wc_checkout_params.is_checkout = "1";
         triggerJQuery('init_checkout');
     }
 
+
+
+
+    const thankyous = document.querySelectorAll('[data-node-type="commerce-order-confirmation-wrapper"] .w-commerce-commercecheckoutorderitemswrapper')
+
+    if(thankyous) {
+        import('./thankyou').then(module => {
+            thankyous.forEach(thankyou => new module.default(thankyou));
+        })
+    }
 
     manageAddToCarts(udesly);
 
