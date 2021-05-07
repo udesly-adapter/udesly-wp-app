@@ -132,3 +132,12 @@ body.woocommerce-page form .form-row label.woocommerce-form__label-for-checkbox 
     -webkit-appearance: none;
     -moz-appearance: none;
 }
+
+span.woocommerce-terms-and-conditions-checkbox-text {
+    margin-left: 8px;
+    font-size: 90%;
+}
+
+.woocommerce-terms-and-conditions-wrapper .required {
+    display: none;
+}

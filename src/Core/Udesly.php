@@ -99,6 +99,18 @@ final class Udesly
 		    $tag = '<script type="module" src="' . esc_url( $src ) . '"></script>';
 		    return $tag;
 	    }, 10, 3);
+
+
+	    add_filter('template_include', function ($template) {
+		    if (post_password_required() && !is_post_type_archive()) {
+			    $path = trailingslashit( get_template_directory() ) . '401.php';
+			    if (file_exists($path)) {
+				    return $path;
+			    }
+		    }
+
+		    return $template;
+	    });
     }
 
     private function init()
