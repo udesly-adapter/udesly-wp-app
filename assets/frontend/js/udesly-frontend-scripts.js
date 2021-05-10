@@ -5,7 +5,7 @@ import "./chunk-F543FC74.js";
 
 // src/store/index.ts
 async function initStore(woocommerce = false) {
-  const module = woocommerce ? await import("./wc-models-JKOWOWW5.js") : await import("./models-UHLHQ5FZ.js");
+  const module = woocommerce ? await import("./wc-models-2LJY676A.js") : await import("./models-PAONSWU4.js");
   return init({
     models: module.models,
     name: woocommerce ? "WP/WC Store" : "WP Store",
@@ -78,6 +78,76 @@ var addCurrentClassToLinks = () => {
 };
 function wp(udesly) {
   addCurrentClassToLinks();
+  handlePaginationElements(udesly);
+  udesly.on("wordpress/postsLoaded", () => {
+    handlePaginationElements(udesly);
+  });
+  document.querySelectorAll("form[data-ajax-action]").forEach((el) => {
+    const wrapper = el.parentElement;
+    const done = wrapper.querySelector(".w-form-done");
+    const error = wrapper.querySelector(".w-form-fail");
+    const errorMessage = error.lastElementChild || error;
+    const submit = el.querySelector("input[type=submit]");
+    if (submit) {
+      submit.dataset["value"] = submit.value;
+    }
+    wrapper.onFormError = function(message) {
+      errorMessage.textContent = (message || "Failed to send form").toString();
+      error.style.display = "inherit";
+      if (submit) {
+        submit.value = submit.dataset["value"];
+      }
+    };
+    wrapper.onFormSuccess = function() {
+      el.style.display = "none";
+      done.style.display = "inherit";
+      if (submit) {
+        submit.value = submit.dataset["value"];
+      }
+    };
+    el.addEventListener("submit", (e) => {
+      done.style.display = "none";
+      error.style.display = "none";
+      if (submit) {
+        submit.value = submit.dataset["wait"];
+      }
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      const data = new FormData(el);
+      data.set("action", "udesly_ajax_" + el.dataset.ajaxAction);
+      udesly.dispatch("wordpress/sendForm", {parent: el.parentElement, data});
+    });
+  });
+}
+function handlePaginationElements(udesly) {
+  document.querySelectorAll(".w-pagination-wrapper").forEach((el) => {
+    if (el.dataset["paginationInit"]) {
+      return;
+    }
+    el.dataset["paginationInit"] = "true";
+    const queryName = el.dataset.query;
+    const paged = Number(el.dataset.paged);
+    const list = el.closest(".w-dyn-list");
+    el.querySelectorAll(".w-pagination-previous").forEach((button) => {
+      button.addEventListener("click", () => {
+        udesly.dispatch("wordpress/loadPosts", {
+          queryName,
+          paged: paged - 1,
+          list
+        });
+      }, true);
+    });
+    el.querySelectorAll(".w-pagination-next").forEach((button) => {
+      button.addEventListener("click", () => {
+        udesly.dispatch("wordpress/loadPosts", {
+          queryName,
+          paged: paged + 1,
+          list
+        });
+      }, true);
+    });
+  });
 }
 
 // src/udesly-frontend-scripts.ts
@@ -113,7 +183,7 @@ var lastBtn;
   const udesly = woocommerce ? initUdesly(store) : initUdesly(store);
   wp(udesly);
   if (woocommerce) {
-    const module = await import("./wc-FPEG67BG.js");
+    const module = await import("./wc-X7VCFK2P.js");
     await module.default(udesly);
   }
 })();

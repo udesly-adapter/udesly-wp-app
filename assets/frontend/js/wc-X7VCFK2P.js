@@ -4,7 +4,7 @@ import {
 import {
   onJQueryEvent,
   triggerJQuery
-} from "./chunk-YSIVNBU5.js";
+} from "./chunk-2ADP63A3.js";
 import {
   __commonJS,
   __toModule
@@ -502,7 +502,7 @@ function initAddToCarts(udesly) {
 }
 function manageAddToCarts(udesly) {
   initAddToCarts(udesly);
-  udesly.on("wordpress/ajaxPagination", () => {
+  udesly.on("wordpress/postsLoaded", () => {
     initAddToCarts(udesly);
   });
 }
@@ -537,7 +537,7 @@ async function wc(udesly) {
   }, document);
   const checkouts = getElementsByDataNodeType("commerce-checkout-form-container");
   if (checkouts) {
-    import("./checkout-LCJUSSTH.js").then((checkoutModule) => {
+    import("./checkout-WOH5RCJY.js").then((checkoutModule) => {
       checkouts.forEach((checkout) => new checkoutModule.default(udesly, checkout));
       triggerJQuery("init_checkout");
     });
@@ -557,4 +557,4 @@ async function wc(udesly) {
 export {
   wc as default
 };
-//# sourceMappingURL=wc-FPEG67BG.js.map
+//# sourceMappingURL=wc-X7VCFK2P.js.map

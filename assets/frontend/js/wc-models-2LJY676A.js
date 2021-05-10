@@ -1,9 +1,12 @@
 import {
+  wordpress
+} from "./chunk-YLIQAQBW.js";
+import {
   createModel
 } from "./chunk-IPQTGU6P.js";
 import {
   triggerJQuery
-} from "./chunk-YSIVNBU5.js";
+} from "./chunk-2ADP63A3.js";
 import "./chunk-F543FC74.js";
 
 // src/store/models/wc.ts
@@ -194,8 +197,8 @@ var woocommerce = createModel()({
 });
 
 // src/store/wc-models.ts
-var models = {woocommerce};
+var models = {woocommerce, wordpress};
 export {
   models
 };
-//# sourceMappingURL=wc-models-JKOWOWW5.js.map
+//# sourceMappingURL=wc-models-2LJY676A.js.map

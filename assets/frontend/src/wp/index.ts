@@ -13,4 +13,99 @@ export const addCurrentClassToLinks = () => {
 
 export default function wp(udesly: Udesly<RootModel>) {
     addCurrentClassToLinks();
+    handlePaginationElements(udesly);
+
+    udesly.on('wordpress/postsLoaded', () => {
+        handlePaginationElements(udesly);
+    })
+
+    document.querySelectorAll<HTMLFormElement>('form[data-ajax-action]').forEach( el => {
+
+        const wrapper = el.parentElement;
+
+        const done = wrapper.querySelector('.w-form-done');
+        const error = wrapper.querySelector('.w-form-fail');
+
+        const errorMessage = error.lastElementChild || error;
+
+        const submit = el.querySelector<HTMLInputElement>('input[type=submit]');
+        if (submit) {
+            submit.dataset['value'] = submit.value;
+        }
+
+        wrapper.onFormError = function(message) {
+            errorMessage.textContent = (message || "Failed to send form").toString();
+            error.style.display = "inherit";
+            if (submit) {
+                submit.value = submit.dataset['value'];
+            }
+
+        }
+
+        wrapper.onFormSuccess = function() {
+            el.style.display = "none";
+            done.style.display = "inherit";
+
+            if (submit) {
+                submit.value = submit.dataset['value'];
+            }
+            // TODO: add form redirect;
+        }
+
+        el.addEventListener('submit', e => {
+
+            done.style.display = "none";
+            error.style.display = "none";
+
+            if(submit) {
+                submit.value = submit.dataset['wait'];
+            }
+
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+
+            const data = new FormData(el);
+            data.set('action', "udesly_ajax_" + el.dataset.ajaxAction);
+            udesly.dispatch('wordpress/sendForm', {parent: el.parentElement, data});
+        })
+    });
+}
+
+
+function handlePaginationElements(udesly: Udesly<RootModel>) {
+    document.querySelectorAll<HTMLElement>('.w-pagination-wrapper').forEach( el => {
+        if (el.dataset['paginationInit']) {
+            return;
+        }
+
+        el.dataset['paginationInit'] = "true";
+
+        const queryName = el.dataset.query;
+        const paged = Number(el.dataset.paged);
+        const list = el.closest('.w-dyn-list');
+        el.querySelectorAll('.w-pagination-previous').forEach( button => {
+
+            button.addEventListener('click', () => {
+                udesly.dispatch('wordpress/loadPosts', {
+                    queryName,
+                    paged: paged - 1,
+                    list
+                })
+            }, true)
+
+        })
+        el.querySelectorAll('.w-pagination-next').forEach( button => {
+
+            button.addEventListener('click', () => {
+
+                udesly.dispatch('wordpress/loadPosts', {
+                    queryName,
+                    paged: paged + 1,
+                    list
+                })
+            }, true)
+
+        })
+    })
 }

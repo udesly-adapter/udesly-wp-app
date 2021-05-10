@@ -1,8 +1,8 @@
 import {Models} from "@rematch/core";
-import {count} from "./models/count";
+import { wordpress } from "./models/wordpress";
 
 export interface RootModel extends Models<RootModel> {
-    count: typeof count
+    wordpress: typeof wordpress
 }
 
-export const models: RootModel = { count }
+export const models: RootModel = { wordpress }

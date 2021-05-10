@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["../src/store/models/count.ts", "../src/store/models.ts"],
-  "sourcesContent": ["import { createModel } from '@rematch/core'\nimport { RootModel } from '../models'\n\nexport const count = createModel<RootModel>()({\n    state: 0,\n    reducers: {\n        increment(state, payload: number) {\n            return state + payload\n        },\n    },\n    effects: (dispatch) => ({\n        incrementAsync(payload: number, state) {\n            dispatch.count.increment(payload)\n        },\n    }),\n});", "import {Models} from \"@rematch/core\";\nimport {count} from \"./models/count\";\n\nexport interface RootModel extends Models<RootModel> {\n    count: typeof count\n}\n\nexport const models: RootModel = { count }\n"],
-  "mappings": ";;;;;;AAGO,IAAM,QAAQ,cAAyB;AAAA,EAC1C,OAAO;AAAA,EACP,UAAU;AAAA,IACN,UAAU,OAAO,SAAiB;AAC9B,aAAO,QAAQ;AAAA;AAAA;AAAA,EAGvB,SAAS,CAAC,aAAc;AAAA,IACpB,eAAe,SAAiB,OAAO;AACnC,eAAS,MAAM,UAAU;AAAA;AAAA;AAAA;;;ACL9B,IAAM,SAAoB,CAAE;",
-  "names": []
-}

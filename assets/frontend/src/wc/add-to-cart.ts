@@ -68,7 +68,7 @@ export function manageAddToCarts(udesly: Udesly<WooCommerceRootModel>) {
 
     initAddToCarts(udesly);
 
-    udesly.on("wordpress/ajaxPagination", () => {
+    udesly.on("wordpress/postsLoaded", () => {
         initAddToCarts(udesly);
     });
 

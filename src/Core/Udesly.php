@@ -51,6 +51,7 @@ final class Udesly
     private function include_dependencies() {
     	include_once UDESLY_PLUGIN_DIR_PATH . "/misc/post.php";
 	    include_once UDESLY_PLUGIN_DIR_PATH . "/misc/custom-fields.php";
+	    include_once UDESLY_PLUGIN_DIR_PATH . "/misc/utils.php";
 
 	    add_action('plugins_loaded', function() {
 		    if ( class_exists( 'woocommerce' ) ) {
@@ -64,8 +65,6 @@ final class Udesly
 	    if ((Theme::instance())->is_valid()) {
 		    $this->init();
 	    }
-
-
     }
 
     private function admin_hooks()
@@ -85,7 +84,8 @@ final class Udesly
 					'woocommerce' => class_exists( 'woocommerce' ),
 				],
 				'wp' => [
-					'ajax_url' => admin_url( 'admin-ajax.php' )
+					'ajax_url' => admin_url( 'admin-ajax.php' ),
+					'lifespan' => apply_filters( 'nonce_life', DAY_IN_SECONDS )
 				]
 			]));
 	    	wp_enqueue_script("udesly-frontend");
@@ -124,6 +124,8 @@ final class Udesly
 	        $this->admin_hooks();
         }
 	    $this->public_hooks();
+
+        include_once UDESLY_PLUGIN_DIR_PATH . '/src/Ajax/index.php';
     }
 
 
