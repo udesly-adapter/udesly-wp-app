@@ -32,3 +32,4 @@ function udesly_check_ajax_security() {
 include_once __DIR__ . '/pagination.php';
 include_once __DIR__ . '/user.php';
 include_once __DIR__ . '/forms.php';
+include_once __DIR__ . '/privacy.php';

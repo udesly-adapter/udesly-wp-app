@@ -144,6 +144,11 @@ function udesly_contact_forms_init() {
 			            echo "<li><strong>$key</strong>: $value</li>";
                     }
 			        echo "</ul>";
+
+			        if (isset($data->email)) {
+
+			            echo "<a href='mailto:". $data->email . "'>" . __('Reply') . '</a>';
+                    }
 		        },
 		        'udesly_contact_forms',
 		        'normal',
