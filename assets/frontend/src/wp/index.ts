@@ -28,6 +28,9 @@ export default function wp(udesly: Udesly<RootModel>) {
 
         const errorMessage = error.lastElementChild || error;
 
+        const redirect = el.getAttribute('data-redirect');
+
+
         const submit = el.querySelector<HTMLInputElement>('input[type=submit]');
         if (submit) {
             submit.dataset['value'] = submit.value;
@@ -49,7 +52,11 @@ export default function wp(udesly: Udesly<RootModel>) {
             if (submit) {
                 submit.value = submit.dataset['value'];
             }
-            // TODO: add form redirect;
+
+            if (redirect) {
+                // @ts-ignore
+                window.location = redirect;
+            }
         }
 
         el.addEventListener('submit', e => {

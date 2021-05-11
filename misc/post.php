@@ -128,7 +128,7 @@ if (!function_exists('udesly_define_post_type')) {
 			'supports' => ['author', 'excerpt', 'thumbnails', 'title'],
 		]);
 
-		$args = apply_filters('udesly_define_post_type_args', $args, $post_type);
+		$args = apply_filters('udesly/post_type/args', $args, $post_type);
 
 		register_post_type($post_type,
 			$args
@@ -154,7 +154,7 @@ if (!function_exists('udesly_define_taxonomy')) {
 			'supports' => ['author', 'excerpt', 'thumbnails', 'title'],
 		]);
 
-		$args = apply_filters('udesly_define_taxonomy_args', $args, $taxonomy);
+		$args = apply_filters('udesly/taxonomy/args', $args, $taxonomy);
 
 		register_taxonomy(
 			$taxonomy,

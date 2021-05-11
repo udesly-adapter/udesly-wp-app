@@ -1,6 +1,6 @@
 import {
   wordpress
-} from "./chunk-YLIQAQBW.js";
+} from "./chunk-HWMHPBBJ.js";
 import {
   createModel
 } from "./chunk-IPQTGU6P.js";
@@ -201,4 +201,4 @@ var models = {woocommerce, wordpress};
 export {
   models
 };
-//# sourceMappingURL=wc-models-2LJY676A.js.map
+//# sourceMappingURL=wc-models-ZGE43XP2.js.map

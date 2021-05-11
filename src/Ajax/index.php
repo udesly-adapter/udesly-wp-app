@@ -21,13 +21,14 @@ function udesly_ajax_generate_nonce() {
 function udesly_check_ajax_security() {
 
 	if (!empty($_REQUEST['contact_me_by_fax_only']) && (bool) $_REQUEST['contact_me_by_fax_only'] == TRUE) {
-		wp_send_json_error("Spam Bot");
+		wp_send_json_error("Spam Bot", 403);
 	}
 
 	if (!check_ajax_referer('udesly_ajax_nonce', 'security', false)) {
-		wp_send_json_error("Failed security check");
+		wp_send_json_error("Failed security check", 403);
 	}
 }
 
 include_once __DIR__ . '/pagination.php';
 include_once __DIR__ . '/user.php';
+include_once __DIR__ . '/forms.php';

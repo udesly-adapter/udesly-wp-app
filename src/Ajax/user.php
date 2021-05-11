@@ -324,7 +324,7 @@ function __udesly_send_login_email_for_user( $uid, $email ) {
 		'uid' => $uid,
 		'token' => $token,
 		'nonce' => $nonce,
-		'a' => "__up"
+		'a' => "__u_p"
 	];
 
 	$login_url = add_query_arg($args, site_url());
@@ -338,4 +338,53 @@ function __udesly_send_login_email_for_user( $uid, $email ) {
 	$headers = apply_filters("udesly/ajax/login/email_headers", array('Content-Type: text/html; charset=UTF-8'));
 
 	return wp_mail($email, $subject, $message, $headers);
+}
+
+add_action('wp', '__udesly_passwordless_check_auth_url');
+
+function __udesly_passwordless_check_auth_url() {
+	if (!isset($_GET['a']) || "__u_p" !== $_GET['a'] ) {
+		return;
+	}
+
+	$uid = sanitize_key($_GET['uid']);
+	$token = sanitize_key($_GET['token']);
+	$nonce = sanitize_key($_GET['nonce']);
+
+	$errors = new \WP_Error();
+
+	if (!wp_verify_nonce($nonce, "udesly_passwordless_login")) {
+		$errors->add("failed_nonce", "Failed nonce check");
+	}
+
+	if (!$uid || !$token) {
+		$errors->add("missing_parameters", "Parameters missing");
+	}
+
+	$saved_token = get_user_meta($uid, '_udesly_temp_token', true);
+	$expiration = get_user_meta($uid, '_udesly_temp_token_expiration', true);
+
+	$time = time();
+
+	if (!wp_check_password($token.$expiration, $saved_token)) {
+		$errors->add("invalid_token", "Token is invalid or expired");
+	}
+	if ($time > $expiration) {
+		$errors->remove("invalid_token");
+		$errors->add("invalid_token", "Token is invalid or expired");
+	}
+
+	$error_codes = $errors->get_error_codes();
+
+	if (!empty($error_codes)) {
+		wp_die($errors);
+	}
+
+	wp_set_auth_cookie($uid);
+	delete_user_meta($uid, "_udesly_temp_token");
+	delete_user_meta($uid, "_udesly_temp_token_expiration");
+	delete_user_meta($uid, "_udesly_temp_token_last_attempt");
+
+	wp_redirect(site_url());
+	exit;
 }

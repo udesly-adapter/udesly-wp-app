@@ -32,8 +32,26 @@ if ( ! function_exists( 'bench' ) ) {
 if ( ! function_exists( 'debug_log' ) ) {
 
 	function debug_log( $val ) {
-
+		if (defined('WP_DEBUG') && true == WP_DEBUG && defined('WP_DEBUG_LOG') && true == WP_DEBUG_LOG)
 		error_log( var_export( $val, true ) );
 	}
 
+}
+
+add_filter( 'wp_die_handler', function( $handler ) {
+	if (is_admin()) {
+		return $handler;
+	}
+	if (file_exists(get_stylesheet_directory() . '/wp-die.php')) {
+		return "udesly_custom_die_handler";
+	}
+	return $handler;
+}, 10 );
+
+function udesly_custom_die_handler( $message, $title = "", $args = array()) {
+	global $errors;
+	$errors = is_wp_error($message) ? $message->get_error_messages() : [$message];
+
+	require_once get_stylesheet_directory() . '/wp-die.php';
+	die;
 }

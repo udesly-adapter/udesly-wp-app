@@ -5,7 +5,7 @@ import "./chunk-F543FC74.js";
 
 // src/store/index.ts
 async function initStore(woocommerce = false) {
-  const module = woocommerce ? await import("./wc-models-2LJY676A.js") : await import("./models-PAONSWU4.js");
+  const module = woocommerce ? await import("./wc-models-ZGE43XP2.js") : await import("./models-5KOWW475.js");
   return init({
     models: module.models,
     name: woocommerce ? "WP/WC Store" : "WP Store",
@@ -87,6 +87,7 @@ function wp(udesly) {
     const done = wrapper.querySelector(".w-form-done");
     const error = wrapper.querySelector(".w-form-fail");
     const errorMessage = error.lastElementChild || error;
+    const redirect = el.getAttribute("data-redirect");
     const submit = el.querySelector("input[type=submit]");
     if (submit) {
       submit.dataset["value"] = submit.value;
@@ -103,6 +104,9 @@ function wp(udesly) {
       done.style.display = "inherit";
       if (submit) {
         submit.value = submit.dataset["value"];
+      }
+      if (redirect) {
+        window.location = redirect;
       }
     };
     el.addEventListener("submit", (e) => {

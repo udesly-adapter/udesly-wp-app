@@ -30,6 +30,10 @@ var wordpress = createModel()({
       return {...state, time: Date.now()};
     },
     formError(state, payload) {
+      if (payload.code && payload.code == 403) {
+        sessionStorage.removeItem("___wp_nonce");
+        sessionStorage.removeItem("___wp_nonce_saved");
+      }
       return {...state, time: Date.now()};
     },
     postsLoaded(state, payload) {
@@ -41,6 +45,7 @@ var wordpress = createModel()({
   effects: (dispatch) => ({
     async sendForm(payload, state) {
       const {parent, data} = payload;
+      data.set("security", await getNonce());
       if (Date.now() < state.wordpress.time + 2e3) {
         parent.onFormError && parent.onFormError("Anti Spam check failed!");
         return;
@@ -59,7 +64,7 @@ var wordpress = createModel()({
           dispatch.wordpress.formSentSuccessfully(jsonData.data);
           parent.onFormSuccess && parent.onFormSuccess();
         } else {
-          dispatch.wordpress.formError(jsonData.data || "Failed to send form");
+          dispatch.wordpress.formError({data: jsonData.data || "Failed to send form", code: res.status});
           parent.onFormError && parent.onFormError(jsonData.data || "Failed to send form");
           return;
         }
@@ -95,4 +100,4 @@ export {
   models,
   wordpress
 };
-//# sourceMappingURL=chunk-YLIQAQBW.js.map
+//# sourceMappingURL=chunk-HWMHPBBJ.js.map
