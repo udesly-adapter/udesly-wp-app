@@ -374,8 +374,15 @@ var Variations = class {
       const prop = el.dataset.variationProp;
       const propType = el.dataset.variationPropType;
       const value = (0, import_lodash.default)(variation, prop, null);
-      if (value) {
+      if (value || prop === "display_regular_price_html" || propType == "Bool") {
         switch (propType) {
+          case "Bool":
+            if (!!value) {
+              el.classList.remove("udesly-hidden");
+            } else {
+              el.classList.add("udesly-hidden");
+            }
+            break;
           case "ImageRef":
             if (el.tagName == "IMG") {
               el.removeAttribute("srcset");
@@ -606,4 +613,4 @@ async function wc(udesly) {
 export {
   wc as default
 };
-//# sourceMappingURL=wc-J3LERZUI.js.map
+//# sourceMappingURL=wc-5VEW6IV3.js.map

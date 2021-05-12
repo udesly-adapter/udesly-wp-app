@@ -82,8 +82,15 @@ export default class Variations {
             const prop = el.dataset.variationProp;
             const propType = el.dataset.variationPropType;
             const value = get(variation, prop, null);
-            if (value) {
+            if (value || prop === "display_regular_price_html" || propType == "Bool") {
                 switch (propType) {
+                    case "Bool":
+                        if (!!value) {
+                            el.classList.remove('udesly-hidden');
+                        } else {
+                            el.classList.add('udesly-hidden');
+                        }
+                        break;
                     case "ImageRef":
                         if (el.tagName == "IMG") {
                             el.removeAttribute('srcset');

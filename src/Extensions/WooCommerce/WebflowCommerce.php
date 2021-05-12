@@ -169,7 +169,8 @@ class WebflowCommerce {
 
 		$args['display_price_html'] = udesly_format_price($args['display_price']);
 
-		$args['display_regular_price_html'] = udesly_format_price($args['display_regular_price']);
+		$args['display_regular_price_html'] = $args['display_regular_price'] > $args['display_price'] ? udesly_format_price($args['display_regular_price']) : "";
+
 	    return $args;
     }
 
