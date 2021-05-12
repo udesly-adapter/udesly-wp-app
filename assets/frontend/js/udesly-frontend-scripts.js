@@ -187,7 +187,7 @@ var lastBtn;
   const udesly = woocommerce ? initUdesly(store) : initUdesly(store);
   wp(udesly);
   if (woocommerce) {
-    const module = await import("./wc-X7VCFK2P.js");
+    const module = await import("./wc-J3LERZUI.js");
     await module.default(udesly);
   }
 })();

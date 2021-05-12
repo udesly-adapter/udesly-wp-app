@@ -234,11 +234,23 @@ if ( ! function_exists( 'udesly_custom_field_set' ) ) {
 	function udesly_custom_field_set( array $args ): array {
 
 		$args = wp_parse_args( $args, [
-			"help_text" => "",
-			"type"      => "image"
+			'instructions' => '',
+			'max' => 0,
+			'min' => 0,
+			'layout' => 'table',
+			'sub_fields' => array(
+				array(
+					'key' => 'field_image',
+					'label' => 'Image',
+					'name' => 'image',
+					'type' => 'image',
+					'return_format' => 'id',
+					'library' => 'all',
+				),
+			),
 		] );
 
-		return udesly_custom_field_generics( $args, "gallery" );
+		return udesly_custom_field_generics( $args, "set" );
 	}
 
 }

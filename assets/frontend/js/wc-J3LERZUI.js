@@ -338,6 +338,16 @@ var Variations = class {
     } else {
       this.variationElements = document.querySelectorAll("[data-variation-prop]:not(.w-dyn-item [data-variation-prop])");
     }
+    this.variationElements.forEach((el) => {
+      if (el.dataset.variationPropType == "Set") {
+        const item = el.querySelector('[data-repeater-prop="item"]');
+        if (item) {
+          el.__item = item.cloneNode(true);
+          el.__item.classList.remove("udesly-hidden");
+          item.remove();
+        }
+      }
+    });
   }
   handleVariationSwatchesEvents() {
     this.addToCartForm.querySelectorAll('[data-node-type="add-to-cart-option-pill"]').forEach((pill) => {
@@ -373,6 +383,45 @@ var Variations = class {
               el.setAttribute("src", value);
             } else {
               el.style.backgroundImage = `url("${value}")`;
+            }
+            break;
+          case "Set":
+            if (!el.__item) {
+              return;
+            }
+            const items = el.querySelector(".w-dyn-items");
+            items.innerHTML = "";
+            if (!value.length) {
+              el.querySelector(".w-dyn-empty").classList.remove("udesly-hidden");
+            } else {
+              el.querySelector(".w-dyn-empty").classList.add("udesly-hidden");
+              for (let image of value) {
+                const item = el.__item.cloneNode(true);
+                item.querySelectorAll("[data-repeater-prop]").forEach((e) => {
+                  if (e.classList.contains("w-lightbox")) {
+                    const script = e.querySelector("script.w-json");
+                    if (script) {
+                      const oldItems = JSON.parse(script.textContent);
+                      oldItems.items = [
+                        {
+                          type: "image",
+                          url: image.image.src,
+                          caption: image.image.caption
+                        }
+                      ];
+                      script.textContent = JSON.stringify(oldItems);
+                    }
+                  } else if (e.tagName == "IMG") {
+                    e.setAttribute("src", image.image.src);
+                    e.removeAttribute("srcset");
+                    e.setAttribute("alt", image.image.alt);
+                  } else {
+                    e.style.backgroundImage = `url("${image.image.src}")`;
+                  }
+                });
+                items.append(item);
+              }
+              Webflow.require("lightbox") && Webflow.require("lightbox").ready();
             }
             break;
           default:
@@ -557,4 +606,4 @@ async function wc(udesly) {
 export {
   wc as default
 };
-//# sourceMappingURL=wc-X7VCFK2P.js.map
+//# sourceMappingURL=wc-J3LERZUI.js.map

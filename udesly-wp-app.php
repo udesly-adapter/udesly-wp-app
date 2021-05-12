@@ -69,8 +69,8 @@ add_action('plugins_loaded', function () {
 		} );
 		// (Optional) Hide the ACF admin menu item.
 		add_filter( 'acf/settings/show_admin', function( $show_admin ) {
-			return false;
-			//return $show_admin;
+			//return false;
+			return $show_admin;
 		}, 10);
 	}
 
@@ -78,5 +78,6 @@ add_action('plugins_loaded', function () {
 
 
 add_action('init', function() {
-   $product = new WC_Product(2324);
+
+
 });

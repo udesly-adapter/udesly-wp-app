@@ -1034,8 +1034,10 @@ class SetField extends \acf_field {
 
 			// Modify sub fields.
 			foreach( $sub_fields as $i => $sub_field ) {
-				$sub_fields[ $i ]['parent'] = $field['key'];
-				$sub_fields[ $i ]['menu_order'] = $i;
+
+				     $sub_fields[ $i ]['parent'] = $field['key'];
+				     $sub_fields[ $i ]['menu_order'] = $i;
+
 			}
 
 			// Return array of [field, sub_1, sub_2, ...].

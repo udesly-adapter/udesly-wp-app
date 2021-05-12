@@ -66,14 +66,42 @@ if (!function_exists('udesly_get_compare_at_price')) {
 	}
 }
 
+function udesly_wc_get_variant_more_images($id = null) {
+    if ($id) {
+	    return udesly_get_custom_post_field($id, 'more-images', 'Set');
+    }
+
+    global $variant;
+
+    if ($variant->is_type('variation')) {
+	    return udesly_get_custom_post_field($variant->get_id(), 'more-images', 'Set');
+    }
+
+    $images = [];
+	foreach ($variant->get_gallery_image_ids() as $image_id) {
+	    $images[] = [
+	            'image' => udesly_get_image(
+	                    ['id' => $image_id]
+                )
+        ];
+    }
+
+	return $images;
+
+}
+
 if (!function_exists('udesly_get_wc_product_default_variant')) {
 
 	function udesly_get_wc_product_default_variant() {
 		global $product;
 
+		if (is_admin()) {
+		    return $product;
+        }
+
 		if( $product->is_type('variable') ){
-			$default_attributes = $product->get_default_attributes();
-			foreach($product->get_available_variations() as $variation_values ){
+		    $variations = $product->get_available_variations();
+			foreach($variations as $variation_values ){
 				foreach($variation_values['attributes'] as $key => $attribute_value ){
 					$attribute_name = str_replace( 'attribute_', '', $key );
 					$default_value = $product->get_variation_default_attribute($attribute_name);
@@ -97,6 +125,9 @@ if (!function_exists('udesly_get_wc_product_default_variant')) {
 				return wc_get_product($variation_id);
 
 			}
+
+
+			return wc_get_product((reset($variations)['variation_id']));
 		}
 		return $product;
 	}
@@ -693,6 +724,13 @@ function udesly_wc_get_variable_product_data() {
 	];
 
 	$variation_data['attribute_keys'] = array_keys($variation_data['attributes']);
+
+	if ($variation_data['available_variations']) {
+	    foreach ($variation_data['available_variations'] as $key => $variation) {
+		    $variation_data['available_variations'][$key]['more-images'] = udesly_wc_get_variant_more_images($variation['variation_id']);
+        }
+    }
+
 
 	$variations_json = wp_json_encode( $variation_data['available_variations'] );
 	$variation_data['variations_attr'] = function_exists( 'wc_esc_json' ) ? wc_esc_json( $variations_json ) : _wp_specialchars( $variations_json, ENT_QUOTES, 'UTF-8', true );

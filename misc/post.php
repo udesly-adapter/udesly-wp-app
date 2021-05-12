@@ -93,7 +93,8 @@ if (!function_exists('udesly_get_image'))  {
 				"src"    => "",
 				"alt"    => "",
 				"srcset" => "",
-				"sizes"  => ""
+				"sizes"  => "",
+				"caption" => ""
 			];
 		}
 
@@ -103,6 +104,7 @@ if (!function_exists('udesly_get_image'))  {
 			"src"    => esc_url( wp_get_attachment_image_url( $args["id"], $args["size"] ) ?? '' ),
 			"srcset" => wp_get_attachment_image_srcset( $args["id"] ),
 			"sizes"  => wp_get_attachment_image_sizes( $args["id"] ),
+			"caption" => wp_get_attachment_caption($args["id"])
 		];
 
 		wp_cache_set( $key,  $image, "udesly_theme" );
@@ -111,6 +113,16 @@ if (!function_exists('udesly_get_image'))  {
 	}
 }
 
+function udesly_get_fake_set_item() {
+	return ["image" => (object) [
+		"id" => "",
+		"src"    => "",
+		"alt"    => "",
+		"srcset" => "",
+		"sizes"  => "",
+		"caption" => ""
+	]];
+}
 
 if (!function_exists('udesly_define_post_type')) {
 
@@ -125,7 +137,7 @@ if (!function_exists('udesly_define_post_type')) {
 			'has_archive' => true,
 			'show_in_rest' => true,
 			'rest_base' => "post-type/$post_type",
-			'supports' => ['author', 'excerpt', 'thumbnails', 'title'],
+			'supports' => ['author', 'excerpt', 'editor', 'thumbnail', 'title'],
 		]);
 
 		$args = apply_filters('udesly/post_type/args', $args, $post_type);

@@ -132,6 +132,8 @@
 
             render: function(){
 
+                window.test = this;
+
                 // update order number
                 this.$rows().each(function( i ){
                     $(this).find('> .order > span').html( i+1 );
@@ -416,6 +418,8 @@
 
             onShow: function( e, $el, context ){
 
+                console.log(e, $el, context);
+
                 // get sub fields
                 var fields = acf.getFields({
                     is: ':visible',
@@ -495,6 +499,7 @@
                 // vars
                 var key = this.key(key, 'load');
                 var data = acf.getPreference(this.name);
+
 
                 // return
                 if( data && data[key] ) {

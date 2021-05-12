@@ -128,7 +128,9 @@ final class DBUtils {
 						if ($image->alt) {
 							update_post_meta($result['attachment_id'], '_wp_attachment_image_alt', $value->alt);
 						}
-						$results[] = $result['attachment_id'];
+						$results[] = [
+							"image" => $result['attachment_id'],
+						];
 					}
 				}
 				return $results;
@@ -370,7 +372,6 @@ final class DBUtils {
 
 
 		if ($old_post) {
-			debug_log($old_post);
 			return $old_post;
 		}
 

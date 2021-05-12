@@ -55,3 +55,4 @@ function udesly_custom_die_handler( $message, $title = "", $args = array()) {
 	require_once get_stylesheet_directory() . '/wp-die.php';
 	die;
 }
+

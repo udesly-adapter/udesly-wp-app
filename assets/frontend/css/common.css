@@ -141,3 +141,7 @@ span.woocommerce-terms-and-conditions-checkbox-text {
 .woocommerce-terms-and-conditions-wrapper .required {
     display: none;
 }
+
+.udesly-hidden {
+    display: none;
+}
