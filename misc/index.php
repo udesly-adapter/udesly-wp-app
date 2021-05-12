@@ -56,3 +56,24 @@ function udesly_custom_die_handler( $message, $title = "", $args = array()) {
 	die;
 }
 
+function udesly_compare_dates($date, $days, $when) {
+
+	try {
+		$start_date = date_create($date);
+		$compare_date = date_create();
+		if ($when == "past") {
+			$compare_date->sub(new DateInterval( "P$days"."D"));
+		} else {
+			$compare_date->add(new DateInterval( "P$days"."D"));
+		}
+		
+	debug_log($start_date);
+	debug_log($compare_date);
+	} catch (Exception $e) {
+		debug_log($e);
+		return 1;
+	}
+
+	return 1;
+
+}
