@@ -66,14 +66,9 @@ function udesly_compare_dates($date, $days, $when) {
 		} else {
 			$compare_date->add(new DateInterval( "P$days"."D"));
 		}
-		
-	debug_log($start_date);
-	debug_log($compare_date);
+		return $start_date->getTimestamp() - $compare_date->getTimestamp();
 	} catch (Exception $e) {
 		debug_log($e);
 		return 1;
 	}
-
-	return 1;
-
 }
