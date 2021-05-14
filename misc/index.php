@@ -42,7 +42,7 @@ add_filter( 'wp_die_handler', function( $handler ) {
 	if (is_admin()) {
 		return $handler;
 	}
-	if (file_exists(get_stylesheet_directory() . '/wp-die.php')) {
+	if (defined('STYLESHEETPATH') && file_exists(get_stylesheet_directory() . '/wp-die.php')) {
 		return "udesly_custom_die_handler";
 	}
 	return $handler;
@@ -56,19 +56,3 @@ function udesly_custom_die_handler( $message, $title = "", $args = array()) {
 	die;
 }
 
-function udesly_compare_dates($date, $days, $when) {
-
-	try {
-		$start_date = date_create($date);
-		$compare_date = date_create();
-		if ($when == "past") {
-			$compare_date->sub(new DateInterval( "P$days"."D"));
-		} else {
-			$compare_date->add(new DateInterval( "P$days"."D"));
-		}
-		return $start_date->getTimestamp() - $compare_date->getTimestamp();
-	} catch (Exception $e) {
-		debug_log($e);
-		return 1;
-	}
-}
