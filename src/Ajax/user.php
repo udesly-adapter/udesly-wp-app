@@ -18,7 +18,7 @@ function udesly_ajax_login() {
 	$info['user_password'] = sanitize_text_field($_POST['password']);
 	$info['remember']      = $_POST['rememberme'] ? true : false;
 
-	$user_signon = wp_signon( $info, apply_filters('udesly_wp_signon_secure_cookie', false, $info['user_login']) );
+	$user_signon = wp_signon( $info, apply_filters('udesly/params/use_secure_cookie', false, $info['user_login']) );
 	if ( is_wp_error( $user_signon ) ) {
 		wp_send_json_error( apply_filters('udesly/ajax/login/error_message', $user_signon->get_error_message() ), 403 );
 	} else {
@@ -46,10 +46,13 @@ function udesly_ajax_register() {
 	$username  = sanitize_text_field($_POST['username']);
 	$password  = sanitize_text_field($_POST['password']);
 	$password_confirm  = sanitize_text_field($_POST['password_repeat']);
-	$email     = sanitize_email($_POST['mail']);
+	$email     = sanitize_email($_POST['email']);
 	$name      = sanitize_text_field($_POST['first_name']);
 	$last_name = sanitize_text_field($_POST['last_name']);
 
+	if(!$username) {
+		$username = $email;
+	}
 
 	$userdata = array(
 		'user_login' => $username,
@@ -84,12 +87,21 @@ function udesly_ajax_register() {
 	// Return
 	if ( ! is_wp_error( $user_id ) ) {
 
+		if (isset($_POST['meta_fields']) && is_array($_POST['meta_fields'])) {
+			foreach ($_POST['meta_fields'] as $meta_key => $value) {
+				$meta_key = sanitize_key($meta_key);
+				$meta_value = sanitize_textarea_field($value);
+
+				update_user_meta($user_id, $meta_key, $meta_value);
+			}
+		}
+
 		$info                  = array();
 		$info['user_login']    = $username;
 		$info['user_password'] = $password;
 		$info['remember']      = true;
 
-		wp_signon( $info, false );
+		wp_signon( $info, apply_filters('udesly/params/use_secure_cookie', false, $info['user_login']) );
 
 		do_action('udesly/ajax/registration_success', $user_id );
 
@@ -98,6 +110,15 @@ function udesly_ajax_register() {
 	} else {
 		wp_send_json_error( $user_id->get_error_message() , 400 );
 	}
+}
+
+udesly_add_ajax_action('logout');
+
+function udesly_ajax_logout() {
+	udesly_check_ajax_security();
+	wp_logout();
+	wp_send_json_success();
+
 }
 
 udesly_add_ajax_action('lost_password');
@@ -148,7 +169,7 @@ function udesly_ajax_lost_password() {
 	$message .= __( 'If this was a mistake, just ignore this email and nothing will happen.' ) . "\r\n\r\n";
 	$message .= __( 'To reset your password, visit the following address:' ) . "\r\n\r\n";
 
-	$message .= esc_url_raw( home_url( $_POST['page_slug'] ) . "?action=rp&key=$key&login=" . urlencode( $user_login ) ) . "\r\n";
+	$message .= esc_url_raw( $_POST['permalink'] . "?action=rp&key=$key&login=" . urlencode( $user_login ) ) . "\r\n";
 
 	if ( is_multisite() ) {
 		$blogname = $GLOBALS['current_site']->site_name;
