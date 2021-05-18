@@ -25,7 +25,7 @@ function udesly_ajax_contact() {
 	    $value = sanitize_textarea_field($value);
 	    $form_data[$key] = $value;
 
-	    $message .= $key . ": " . $value . "\r\n";
+	    $message .= ucfirst($key) . ": " . $value . "\r\n";
     }
 
 	switch($contact_options['on_send_form']) {
