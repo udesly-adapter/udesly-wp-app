@@ -243,6 +243,30 @@ function udesly_ajax_reset_password() {
 
 }
 
+udesly_add_ajax_action('edit_user');
+function udesly_ajax_edit_user() {
+	udesly_check_ajax_security();
+
+	if (!is_user_logged_in()) {
+		wp_send_json_error("You are not allowed to change this data", 403);
+	}
+
+	if (!isset($_POST['user'])) {
+		wp_send_json_error("Form is not correctly configured", 400);
+	}
+	$user_id = get_current_user_id();
+	foreach ($_POST['user'] as $key => $value) {
+		$key = apply_filters('udesly/ajax/edit_user/key', sanitize_key($key));
+		$value = apply_filters('udesly/ajax/edit_user/value', sanitize_textarea_field($value), $key);
+
+		if ($value) {
+			update_user_meta($user_id, $key, $value);
+		}
+	}
+
+	wp_send_json_success();
+}
+
 udesly_add_ajax_action('passwordless_login');
 function udesly_ajax_passwordless_login() {
 	udesly_check_ajax_security();

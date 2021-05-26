@@ -106,3 +106,28 @@ function __udesly_resolve_menu_item($menu_item, $raw_items) {
     $menu_item->items = $items;
     return $menu_item;
 }
+
+function udesly_get_user_meta( $key, $user_id = false ) {
+    if (!$user_id) {
+	    $user_id = get_current_user_id();
+    }
+
+    if (!$user_id) {
+        return "";
+    }
+
+    $cache_key = $user_id . "_meta_" . $key;
+    $cached = wp_cache_get($cache_key);
+    if ($cached) {
+        return $cached;
+    }
+	$value = get_user_meta( $user_id, $key, true );
+
+    if (!$value) {
+        $value = "";
+    }
+
+    wp_cache_set($cache_key, $value);
+
+    return $value;
+}

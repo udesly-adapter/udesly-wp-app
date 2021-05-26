@@ -36,3 +36,7 @@ iframe {
 [class^=FormFooter] button {
     flex: 1;
 }
+
+[class^=PanelBody] * {
+    white-space: break-spaces;
+}

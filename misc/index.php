@@ -56,3 +56,30 @@ function udesly_custom_die_handler( $message, $title = "", $args = array()) {
 	die;
 }
 
+function udesly_get_content_template($content) {
+
+	$template_name = 'template-parts/content/' . $content . ".php";
+
+	$located = '';
+	if ( file_exists( STYLESHEETPATH . '/' . $template_name ) ) {
+		$located = STYLESHEETPATH . '/' . $template_name;
+
+	} elseif ( file_exists( TEMPLATEPATH . '/' . $template_name ) ) {
+		$located = TEMPLATEPATH . '/' . $template_name;
+
+	} elseif ( file_exists( ABSPATH . WPINC . '/theme-compat/' . $template_name ) ) {
+		$located = ABSPATH . WPINC . '/theme-compat/' . $template_name;
+
+	}
+
+	if ($located) {
+		global $posts, $post, $wp_did_header, $wp_query, $wp_rewrite, $wpdb, $wp_version, $wp, $id, $comment, $user_ID;
+
+		$args = apply_filters('udesly_get_content_template_args', []);
+
+		extract($args);
+
+		require_once $located;
+	}
+
+}

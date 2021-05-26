@@ -39,14 +39,16 @@ el.addEventListener('click', e => {
         }
         const els = cache.get(label.htmlFor);
         if (els[0]) {
-            els[0].classList.add('fe-focused');
-            if (focusedElement && focusedElement !== els[0]) {
+            const el = els[0].tagName === "SOURCE" ? els[0].parentElement : els[0];
+
+            el.classList.add('fe-focused');
+            if (focusedElement && focusedElement !== el) {
                 focusedElement.__scrolled = false;
             }
-            focusedElement = els[0];
-            if (!els[0].__scrolled) {
-                els[0].scrollIntoView({ behavior: 'smooth', block: 'center'});
-                els[0].__scrolled = true;
+            focusedElement = el;
+            if (!el.__scrolled) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center'});
+                el.__scrolled = true;
             }
         }
 
@@ -65,23 +67,27 @@ export function onIframeLoad(iframe) {
 
         const target = e.target.matches('[data-link],a') ? e.target: e.target.closest('[data-link]') || e.target.closest('a');
 
-        if (target) {
-            const href = target.getAttribute('href');
-            if (!href.includes("/")) {
-                document.dispatchEvent(new CustomEvent('udesly-fe.notice', {
-                    detail: {
-                        type: 'info',
-                        message: `This link will go to a page with slug: "${href}"`
-                    }
-                }))
-            } else {
-                document.dispatchEvent(new CustomEvent('udesly-fe.notice', {
-                    detail: {
-                        type: 'info',
-                        message: `This link will go to: "${href}"`
-                    }
-                }))
-            }
+        if (target && !target.dataset.wTab) {
+
+
+                const href = target.getAttribute('href');
+                if (!href.includes("/")) {
+                    document.dispatchEvent(new CustomEvent('udesly-fe.notice', {
+                        detail: {
+                            type: 'info',
+                            message: `This link will go to a page with slug: "${href}"`
+                        }
+                    }))
+                } else {
+                    document.dispatchEvent(new CustomEvent('udesly-fe.notice', {
+                        detail: {
+                            type: 'info',
+                            message: `This link will go to: "${href}"`
+                        }
+                    }))
+                }
+
+
         }
     })
 
@@ -238,13 +244,13 @@ function parseConfig(config, label = 'Edit Page', template) {
                 fields: [
                     {
                         name: 'null',
-                        component: () => <div>Set the Absolute Url to the Video file or the Iframe</div>,
+                        component: () => <div><p>Set the Absolute Url to the Video file or the Iframe, or a relative url (without the starting /) to the asset folder</p><p>(e.g: videos/my-video.mp4)</p> <br></br></div>,
 
                     }
                 ]
             }
         }
-        fieldGroups.link.fields.push({
+        fieldGroups.iframe.fields.push({
             name: key,
             component: 'text',
             parse: (value, name) => {
@@ -252,6 +258,7 @@ function parseConfig(config, label = 'Edit Page', template) {
                 return value;
             },
         });
+
         formConfig.initialValues.iframe[key] = config.iframe[key];
     }
     for (let key in config.text) {

@@ -15,6 +15,16 @@ if (!function_exists('udesly_sanitize_url')) {
         }
 	    return home_url($url);
     }
+
+}
+
+function udesly_sanitize_asset_url(string $url) {
+
+	if(\Udesly\Utils\StringUtils::contains($url, ':')) {
+		return esc_url($url);
+	}
+
+	return trailingslashit(get_stylesheet_directory_uri() ) . 'assets/'  . $url;
 }
 
 if (!function_exists('_u')) {
@@ -22,11 +32,15 @@ if (!function_exists('_u')) {
 	function _u($hash, $type, $section = "page") {
 		global $udesly_fe_data;
 
+
 		$data = $udesly_fe_data[$section]->$type->$hash;
 
 		switch ($type) {
             case "link":
                 $data = udesly_sanitize_url($data);
+                break;
+            case "iframe":
+                $data = udesly_sanitize_asset_url($data);
                 break;
             default:
         }
