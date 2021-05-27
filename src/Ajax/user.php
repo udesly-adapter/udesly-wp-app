@@ -259,6 +259,9 @@ function udesly_ajax_edit_user() {
 		$key = apply_filters('udesly/ajax/edit_user/key', sanitize_key($key));
 		$value = apply_filters('udesly/ajax/edit_user/value', sanitize_textarea_field($value), $key);
 
+		if (is_wp_error($value)) {
+			wp_send_json_error(__($value->get_error_message(), 400));
+		}
 		if ($value) {
 			update_user_meta($user_id, $key, $value);
 		}
@@ -433,3 +436,6 @@ function __udesly_passwordless_check_auth_url() {
 	wp_redirect(site_url());
 	exit;
 }
+
+
+// TODO: Add action change email

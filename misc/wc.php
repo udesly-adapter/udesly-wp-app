@@ -823,3 +823,8 @@ function udesly_wc_attribute_variations_select( $args = array() ) {
 
 	return $return;
 }
+
+
+function udesly_get_user_orders() {
+    return wc_get_orders(['customer' => get_current_user_id()]);
+}

@@ -32,8 +32,12 @@ if (!function_exists('_u')) {
 	function _u($hash, $type, $section = "page") {
 		global $udesly_fe_data;
 
-
-		$data = $udesly_fe_data[$section]->$type->$hash;
+        $type = $udesly_fe_data[$section]->$type;
+        if (property_exists($type, $hash)) {
+	        $data = $type->$hash;
+        } else {
+            $data = "Import Data";
+        }
 
 		switch ($type) {
             case "link":

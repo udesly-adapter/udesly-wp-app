@@ -9,6 +9,16 @@ export const addCurrentClassToLinks = () => {
     document.querySelectorAll(`a[href="${currentPath.slice(0,-1)}"],a[href="${currentPath}"]`).forEach( a => {
         a.classList.add(CURRENT_CLASSNAME);
     })
+
+    document.querySelectorAll<HTMLElement>('[data-tab]').forEach( el => {
+        const tab = el.dataset.tab;
+        if (tab) {
+            el.addEventListener('click', e => {
+                e.preventDefault();
+                document.querySelectorAll<HTMLElement>(`[data-w-tab="${tab}"]`).forEach( t => t.click());
+            })
+        }
+    });
 }
 
 export default function wp(udesly: Udesly<RootModel>) {
@@ -43,6 +53,15 @@ export default function wp(udesly: Udesly<RootModel>) {
                 submit.value = submit.dataset['value'];
             }
 
+        }
+
+        wrapper.onFormRedirect = function() {
+            if (redirect) {
+                // @ts-ignore
+                window.location = redirect;
+            } else {
+                window.location.href = "/"
+            }
         }
 
         wrapper.onFormSuccess = function() {

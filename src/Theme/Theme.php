@@ -296,8 +296,18 @@ final class Theme {
 			wp_register_style("udesly-common", UDESLY_PLUGIN_URI . 'assets/frontend/css/common.css', [], UDESLY_PLUGIN_VERSION);
 
 			wp_enqueue_style("udesly-common");
-		});
+			wp_register_script('udesly_country_select', UDESLY_PLUGIN_URI . 'assets/frontend/utils/country-select.js', [], UDESLY_PLUGIN_VERSION, true);
 
+
+			if (function_exists('WC')) {
+
+				wp_localize_script('udesly_country_select', 'udesly_country_select', [
+					'countries_states' => wp_json_encode( array_merge( WC()->countries->get_allowed_country_states(), WC()->countries->get_shipping_country_states() ) ),
+					'countries_options' => wp_json_encode(WC()->countries->get_allowed_countries()),
+					'vat_countries' => wp_json_encode((new \WC_Countries())->get_vat_countries())
+				] );
+			}
+		});
 
 		add_filter('render_block_core/image', function ($block_content, $block) {
 			/*"w-richtext-align-center";

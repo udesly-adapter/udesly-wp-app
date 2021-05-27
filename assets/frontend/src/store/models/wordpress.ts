@@ -55,9 +55,15 @@ export const wordpress = createModel<RootModel>()({
             try {
           const res = await fetch(window.udesly_frontend_options.wp.ajax_url, {
               method: "POST",
-              body: data
+              body: data,
+              redirect: "manual"
           });
-
+            if (res.type == "opaqueredirect") {
+                sessionStorage.removeItem('___wp_nonce');
+                sessionStorage.removeItem('___wp_nonce_saved');
+                parent.onFormRedirect && parent.onFormRedirect();
+                return;
+            }
              const jsonData = await res.json();
               if (jsonData.success) {
                   dispatch.wordpress.formSentSuccessfully(jsonData.data);

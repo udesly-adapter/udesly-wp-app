@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["../src/utils/triggers.ts"],
-  "sourcesContent": ["\n\nexport function triggerJQuery(event, data = null) {\n    setTimeout(\n        () => {\n            jQuery(document.body).trigger(event, data)\n        }, 1\n    )\n}\n\nexport function onJQueryEvent(event, callback, target: any = document.body) {\n    jQuery(target).on(event, callback);\n}\n\nexport function triggerWebflowInteractions() {\n    const Webflow = window.Webflow;\n    if (Webflow && Webflow.require('ix2')) {\n        Webflow.require('ix2').init();\n        document.dispatchEvent(new Event('scroll'))\n    }\n}"],
-  "mappings": ";AAEO,uBAAuB,OAAO,OAAO,MAAM;AAC9C,aACI,MAAM;AACF,WAAO,SAAS,MAAM,QAAQ,OAAO;AAAA,KACtC;AAAA;AAIJ,uBAAuB,OAAO,UAAU,SAAc,SAAS,MAAM;AACxE,SAAO,QAAQ,GAAG,OAAO;AAAA;AAGtB,sCAAsC;AACzC,QAAM,UAAU,OAAO;AACvB,MAAI,WAAW,QAAQ,QAAQ,QAAQ;AACnC,YAAQ,QAAQ,OAAO;AACvB,aAAS,cAAc,IAAI,MAAM;AAAA;AAAA;",
-  "names": []
-}
