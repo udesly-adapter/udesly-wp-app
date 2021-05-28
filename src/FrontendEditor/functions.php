@@ -13,6 +13,7 @@ if (!function_exists('udesly_sanitize_url')) {
         if ("index" === $url || "/" === $url) {
             return home_url();
         }
+
 	    return home_url($url);
     }
 
@@ -32,15 +33,19 @@ if (!function_exists('_u')) {
 	function _u($hash, $type, $section = "page") {
 		global $udesly_fe_data;
 
-        $type = $udesly_fe_data[$section]->$type;
-        if (property_exists($type, $hash)) {
-	        $data = $type->$hash;
+
+        $folder = $udesly_fe_data[$section]->$type;
+        if (property_exists($folder, $hash)) {
+	        $data = $folder->$hash;
         } else {
             $data = "Import Data";
         }
 
+
+
 		switch ($type) {
             case "link":
+
                 $data = udesly_sanitize_url($data);
                 break;
             case "iframe":

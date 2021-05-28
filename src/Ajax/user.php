@@ -438,4 +438,139 @@ function __udesly_passwordless_check_auth_url() {
 }
 
 
-// TODO: Add action change email
+udesly_add_ajax_action('edit_email');
+
+function udesly_ajax_edit_email() {
+	udesly_check_ajax_security();
+
+	if (!isset($_POST['email']) || !is_email($_POST['email'])) {
+		wp_send_json_error("Invalid Email");
+	}
+	if (!is_user_logged_in()) {
+		wp_send_json_error("You can't change email");
+	}
+
+	$user = wp_get_current_user();
+
+	$email = sanitize_email($_POST['email']);
+
+	if ($user->user_email == $email) {
+		wp_send_json_error("You can't use the same email");
+	}
+
+	if (email_exists($email)) {
+		wp_send_json_error("Email already in use");
+	}
+
+	$res = __udesly_send_change_email_for_user($user->ID, $email);
+
+	if (!$res) {
+		wp_send_json_error("Failed to send email");
+	} else {
+		wp_send_json_success();
+	}
+}
+
+function __udesly_send_change_email_for_user( $uid, $email ) {
+	$time = time();
+
+	$last_attempt = (int) get_user_meta($uid, '_udesly_temp_token_change_last_attempt', true);
+
+	$token_expiration_interval = apply_filters('udesly/params/token_expiration', 300);
+
+	if ( $last_attempt > ($time - $token_expiration_interval)) {
+		return new WP_Error(apply_filters("udesly/ajax/login/too_many_attempts",__("Try again later! Limit on email requests reached, try again in few minutes")));
+	}
+
+	// Salt
+	$key = wp_generate_password(20, false);
+
+	$token = wp_hash($time * rand(1, 10) . $key . $time, "secure_auth");
+
+	$expiration = $time + $token_expiration_interval;
+
+	$saved_token = wp_hash_password($token . $expiration);
+
+	update_user_meta($uid, '_udesly_temp_change_token', $saved_token);
+	update_user_meta($uid, '_udesly_temp_change_token_expiration', $expiration);
+	update_user_meta($uid, '_udesly_temp_change_token_last_attempt', $time);
+	update_user_meta($uid, '_udesly_temp_change_token_email', $email);
+
+	$nonce = wp_create_nonce('udesly_edit_email');
+
+	$args = [
+		'uid' => $uid,
+		'token' => $token,
+		'nonce' => $nonce,
+		'a' => "__u_em"
+	];
+
+	$change_email_url = add_query_arg($args, site_url());
+
+	$site_name = get_bloginfo('name');
+
+	$subject = apply_filters("udesly/ajax/edit_email/email_subject", "Email change confirmation [$site_name]");
+
+	$message = apply_filters("udesly/ajax/edit_email/email_message", sprintf("Hello! Confirm your email change at $site_name by visiting this url: <a href=\"%s\" target=\"_blank noreferrer noopener\">Confirm</a>", $change_email_url), $change_email_url);
+
+	$headers = apply_filters("udesly/ajax/edit_email/email_headers", array('Content-Type: text/html; charset=UTF-8'));
+
+	return wp_mail($email, $subject, $message, $headers);
+
+}
+
+add_action('wp', '__udesly_edit_email_check_auth_url');
+
+function __udesly_edit_email_check_auth_url() {
+	if (!isset($_GET['a']) || "__u_em" !== $_GET['a'] ) {
+		return;
+	}
+
+	$uid = sanitize_key($_GET['uid']);
+	$token = sanitize_key($_GET['token']);
+	$nonce = sanitize_key($_GET['nonce']);
+
+	$errors = new \WP_Error();
+
+	if (!wp_verify_nonce($nonce, "udesly_edit_email")) {
+		$errors->add("failed_nonce", "Failed nonce check");
+	}
+
+	if (!$uid || !$token) {
+		$errors->add("missing_parameters", "Parameters missing");
+	}
+
+	$saved_token = get_user_meta($uid, '_udesly_temp_change_token', true);
+	$expiration = get_user_meta($uid, '_udesly_temp_change_token_expiration', true);
+
+	$time = time();
+
+	if (!wp_check_password($token.$expiration, $saved_token)) {
+		$errors->add("invalid_token", "Token is invalid or expired");
+	}
+	if ($time > $expiration) {
+		$errors->remove("invalid_token");
+		$errors->add("invalid_token", "Token is invalid or expired");
+	}
+
+	$error_codes = $errors->get_error_codes();
+
+	if (!empty($error_codes)) {
+		wp_die($errors);
+	}
+
+	$email = get_user_meta($uid, '_udesly_temp_change_token_email', true);
+
+	wp_update_user([
+		'ID' => $uid,
+		'user_email' => $email
+	]);
+
+	delete_user_meta($uid, "_udesly_temp_change_token");
+	delete_user_meta($uid, "_udesly_temp_change_token_expiration");
+	delete_user_meta($uid, "_udesly_temp_change_token_last_attempt");
+	delete_user_meta($uid, '_udesly_temp_change_token_email');
+
+	wp_redirect(site_url());
+	exit;
+}

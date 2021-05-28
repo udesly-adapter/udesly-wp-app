@@ -13,15 +13,12 @@
  * @package Udesly
  */
 
-use Udesly\Utils\DBUtils;
 
 defined( 'ABSPATH' ) || exit;
 
 require __DIR__ . '/vendor/autoload.php';
 
 include_once __DIR__ . '/misc/index.php';
-
-
 
 
 define( 'UDESLY_PLUGIN_DIR_PATH', __DIR__ );
@@ -78,6 +75,5 @@ add_action('plugins_loaded', function () {
 
 
 add_action('init', function() {
-
 
 });

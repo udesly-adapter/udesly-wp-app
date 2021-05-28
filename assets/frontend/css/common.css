@@ -145,3 +145,12 @@ span.woocommerce-terms-and-conditions-checkbox-text {
 .udesly-hidden {
     display: none;
 }
+
+body #add_payment_method #payment, body .woocommerce-cart #payment, body .woocommerce-checkout #payment {
+    background: inherit;
+    border-radius: inherit;
+}
+
+.w-checkout-error-msg a.button.wc-forward {
+    display: none;
+}

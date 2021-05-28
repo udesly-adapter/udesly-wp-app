@@ -24,7 +24,7 @@ export default class Checkout {
             }
         }
         this.includeTaxes = window.udesly_frontend_options.wc.show_taxes === "incl";
-        this.handleItemsInOrder(this.checkoutWrapper.querySelector(".w-commerce-commercecheckoutblockcontent"));
+        this.handleItemsInOrder(this.checkoutWrapper.querySelector(".w-commerce-commercecheckoutorderitemswrapper"));
 
         this.handleCoupon();
 

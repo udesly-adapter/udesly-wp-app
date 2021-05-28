@@ -828,3 +828,76 @@ function udesly_wc_attribute_variations_select( $args = array() ) {
 function udesly_get_user_orders() {
     return wc_get_orders(['customer' => get_current_user_id()]);
 }
+
+
+function udesly_get_product_id_by_slug( $slug ) {
+
+    $cache = wp_cache_get($slug);
+    if ($cache) {
+        return $cache;
+    }
+    $parts = explode("/", $slug);
+
+    if (count($parts) == 1) {
+	    $product = \Udesly\Utils\DBUtils::get_post_by_slug($parts[0], [
+	            'post_type' => 'product',
+                'fields' => 'ids',
+        ]);
+	    if (!$product) {
+	        return null;
+        }
+	    wp_cache_set($slug, $product);
+        return $product;
+    } else if (count($parts) == 2) {
+	    $product = \Udesly\Utils\DBUtils::get_post_by_slug(join("-", $parts), [
+		    'post_type' => 'product_variation',
+		    'fields' => 'ids',
+	    ]);
+	    if (!$product) {
+		    return null;
+	    }
+	    wp_cache_set($slug, $product);
+	    return $product;
+    }
+    return null;
+}
+
+function udesly_get_wc_direct_checkout_url($slug) {
+
+    if (is_numeric($slug)) {
+        $id = (int) $slug;
+    } else {
+        $id = udesly_get_product_id_by_slug($slug);
+    }
+
+    if ($id) {
+	    return add_query_arg(["add-to-cart" => $id, "quantity" => "1"], wc_get_checkout_url());
+    }
+    return "";
+}
+
+function udesly_wc_price($slug, $type = "price") {
+	if (is_numeric($slug)) {
+		$id = (int) $slug;
+	} else {
+		$id = udesly_get_product_id_by_slug($slug);
+	}
+
+	if ($id) {
+		$product = wc_get_product($id);
+		switch ($type) {
+            case "regular":
+                $price = $product->get_regular_price();
+                break;
+            case "sale":
+                $price = $product->get_sale_price();
+                break;
+            default:
+	            $price = $product->get_price();
+
+        }
+		echo wc_price($price);
+	}
+    echo "";
+}
+
