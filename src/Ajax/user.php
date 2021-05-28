@@ -328,7 +328,7 @@ function udesly_ajax_passwordless_registration() {
 	if (is_wp_error($uid)) {
 		wp_send_json_error($uid->get_error_message());
 	}
-	$result = __udesly_send_login_email_for_user($uid, $email);
+	$result = __udesly_send_login_email_for_user($uid, $email, "Register");
 
 	if (is_wp_error($result)) {
 		wp_send_json_error($result->get_error_message());
@@ -342,7 +342,7 @@ function udesly_ajax_passwordless_registration() {
 }
 
 
-function __udesly_send_login_email_for_user( $uid, $email ) {
+function __udesly_send_login_email_for_user( $uid, $email, $title = "Login" ) {
 	$time = time();
 
 	$last_attempt = (int) get_user_meta($uid, '_udesly_temp_token_last_attempt', true);
@@ -379,11 +379,13 @@ function __udesly_send_login_email_for_user( $uid, $email ) {
 
 	$site_name = get_bloginfo('name');
 
-	$subject = apply_filters("udesly/ajax/login/email_subject", "Login to [$site_name]");
+	$action = strtolower($title);
 
-	$message = apply_filters("udesly/ajax/login/email_message", sprintf("Hello! Login at $site_name by visiting this url: <a href=\"%s\" target=\"_blank noreferrer noopener\">Login</a>", $login_url), $login_url);
+	$subject = apply_filters("udesly/ajax/$action/email_subject", "$title to [$site_name]");
 
-	$headers = apply_filters("udesly/ajax/login/email_headers", array('Content-Type: text/html; charset=UTF-8'));
+	$message = apply_filters("udesly/ajax/$action/email_message", sprintf("Hello! $title at $site_name by visiting this url: <a href=\"%s\" target=\"_blank noreferrer noopener\">$title</a>", $login_url), $login_url);
+
+	$headers = apply_filters("udesly/ajax/$action/email_headers", array('Content-Type: text/html; charset=UTF-8'));
 
 	return wp_mail($email, $subject, $message, $headers);
 }
