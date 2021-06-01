@@ -136,7 +136,7 @@ final class Theme {
 	private function get_background_import_status() {
 		$status = get_transient( 'udesly_bg_import_status' );
 
-		return $status ? $status : (Object) ['status' => 'idle'];
+		return $status ? (object) $status : (object) ['status' => 'idle'];
 	}
 
 	private function on_import_end() {

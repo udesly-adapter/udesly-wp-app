@@ -71,10 +71,83 @@ final class Udesly
     {
     	add_action('admin_notices','\Udesly\Utils\Notices::show_notices');
         (Theme::instance())->admin_hooks();
+        add_action('admin_init', [$this, 'init_options']);
+        add_action('admin_menu', [$this, 'add_options_page']);
+    }
+
+    public function enable_temporary_mode() {
+	   $option = get_option('udesly_site_mode');
+
+	   if (!$option || $option == "normal") {
+	   	 return;
+	   }
+	    global $pagenow;
+
+	    if ( $pagenow !== 'wp-login.php' && strpos($_SERVER['REQUEST_URI'], 'wp-admin') === false && ! current_user_can( 'administrator' ) ) {
+		    if ( file_exists( get_stylesheet_directory() . '/maintenance.php' ) ) {
+
+			    if($option == 'maintenance'){
+				    header( 'HTTP/1.1 503 Service Temporarily Unavailable' );
+				    header( 'Content-Type: text/html; charset=utf-8' );
+			    }else{
+				    //coming soon
+				    header( 'HTTP/1.1 307 Temporarily Redirect' );
+				    header( 'Content-Type: text/html; charset=utf-8' );
+			    }
+			    require_once( get_stylesheet_directory() . '/maintenance.php' );
+		    }else{
+			    header( 'HTTP/1.1 503 Service Temporarily Unavailable' );
+			    header( 'Content-Type: text/html; charset=utf-8' );
+
+			    if ( file_exists( get_stylesheet_directory() . '/404.php' ))
+
+				    require_once( get_stylesheet_directory() . '/404.php' );
+		    }
+		    die();
+	    }
+    }
+
+    public function add_options_page() {
+    	add_submenu_page('options-general.php', __('Theme Settings'), __('Theme'), 'administrator', 'udesly_theme_settings', function () {
+			?>
+		    <div class="wrap">
+			    <h1><?php _e('Theme Settings'); ?></h1>
+			    <form method="post" action="options.php">
+				<?php
+				settings_fields( 'udesly_setting_group' );
+				do_settings_sections( 'udesly_setting_group' );
+
+				$site_mode = get_option('udesly_site_mode');
+
+				?>
+				    <table class="form-table">
+					    <tr valign="top">
+						    <th scope="row"><?php _e('Site mode'); ?></th>
+						    <td><select name="udesly_site_mode">
+						            <option value="normal" <?php selected($site_mode, "normal", true); ?>>Default</option>
+								    <option value="maintenance" <?php selected($site_mode, "maintenance", true); ?>>Maintenance</option>
+								    <option value="coming-soon" <?php selected($site_mode, "coming-soon", true); ?>>Coming Soon</option>
+							    </select></td>
+					    </tr>
+				    </table>
+				<?php
+				submit_button();
+				?>
+			    </form>
+		    </div>
+
+<?php
+	    });
+    }
+
+    public function init_options() {
+	    register_setting( 'udesly_setting_group', 'udesly_site_mode' );
     }
 
 
     private function public_hooks() {
+    	add_action('wp_loaded', [$this, "enable_temporary_mode"]);
+
 	    (Theme::instance())->public_hooks();
 	    (CustomFields::instance())->public_hooks();
 	    add_action('wp_enqueue_scripts', function () {
