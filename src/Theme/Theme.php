@@ -380,7 +380,7 @@ final class Theme {
 
 		add_action( 'admin_bar_menu', function (\WP_Admin_Bar $admin_bar) use ($background_status) {
 
-			if ($background_status['status'] !== "idle") {
+			if ($background_status->status !== "idle") {
 				return;
 			}
 
