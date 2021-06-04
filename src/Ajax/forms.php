@@ -5,6 +5,11 @@ if (!defined('ABSPATH')) {
 	exit;
 }
 
+udesly_add_ajax_action('sample');
+function udesly_ajax_sample() {
+	wp_send_json_error(__('Contact Forms are not available in Free mode'));
+}
+
 udesly_add_ajax_action('contact');
 
 function udesly_ajax_contact() {

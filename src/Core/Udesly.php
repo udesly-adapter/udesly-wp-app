@@ -175,6 +175,7 @@ final class Udesly
 
 
 	    add_filter('template_include', function ($template) {
+
 		    if (post_password_required() && !is_post_type_archive()) {
 			    $path = trailingslashit( get_template_directory() ) . '401.php';
 			    if (file_exists($path)) {
