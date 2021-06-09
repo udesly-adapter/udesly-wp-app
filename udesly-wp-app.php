@@ -1,8 +1,8 @@
 <?php
 /**
- * Plugin Name: Udesly Adapter
+ * Plugin Name: Udesly App
  * Plugin URI: https://udesly.com
- * Description: A companion app for the Udesly Adapter
+ * Description: A companion app for the Udesly App
  * Version: 3.0.0
  * Author: Udesly
  * Author URI: https://udesly.com
