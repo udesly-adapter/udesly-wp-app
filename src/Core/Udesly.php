@@ -183,6 +183,19 @@ final class Udesly
 			    }
 		    }
 
+		    if (!is_search()) {
+			    return $template;
+            }
+
+		    $post_type = get_query_var('post_type');
+		    if (file_exists(get_template_directory() . '/search-' . $post_type . '.php')) {
+
+			    $new_template = locate_template(array('search-' . $post_type . '.php'));
+			    if (!empty($new_template)) {
+				    $template = $new_template;
+			    }
+		    }
+		    
 		    return $template;
 	    });
     }
