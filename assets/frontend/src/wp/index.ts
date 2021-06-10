@@ -93,6 +93,7 @@ export default function wp(udesly: Udesly<RootModel>) {
 
             const data = new FormData(el);
             data.set('action', "udesly_ajax_" + el.dataset.ajaxAction);
+            data.set('_referrer', window.location.toString());
             udesly.dispatch('wordpress/sendForm', {parent: el.parentElement, data});
         })
     });
