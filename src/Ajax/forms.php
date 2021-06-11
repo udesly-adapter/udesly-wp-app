@@ -19,8 +19,7 @@ function udesly_ajax_contact() {
 		wp_send_json_error("Form is not correctly configured", 400);
     }
 
-	$contact_options = udesly_get_contact_forms_options();
-
+	
 	$form_data = [];
 
 	$message = __( 'Someone sent a message from ' )  . get_bloginfo( 'name' ) .  __( ':' ) . "\r\n\r\n";
@@ -36,6 +35,10 @@ function udesly_ajax_contact() {
 	$referrer = isset($_POST['_referrer']) ? sanitize_text_field($_POST['_referrer']) : "/";
 	$form_data['_referrer'] = $referrer;
 
+	$contact_options = apply_filters('udesly/params/contact_form_options', udesly_get_contact_forms_options(), $form_data);
+
+	do_action('udesly/ajax/contact/before_form_sent', $form_data);
+
 	switch($contact_options['on_send_form']) {
         case "only_save":
             __udesly_save_form_data($form_data);
@@ -47,6 +50,8 @@ function udesly_ajax_contact() {
 		    __udesly_save_form_data($form_data);
 	        __udesly_send_form_data($message, $form_data, $contact_options, true);
     }
+
+	do_action('udesly/ajax/contact/after_form_sent', $form_data);
 
 	wp_send_json_success();
 }
