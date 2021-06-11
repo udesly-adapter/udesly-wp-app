@@ -33,6 +33,9 @@ function udesly_ajax_contact() {
 	    $message .= ucfirst($key) . ": " . $value . "\r\n";
     }
 
+	$referrer = isset($_POST['_referrer']) ? sanitize_text_field($_POST['_referrer']) : "/";
+	$form_data['_referrer'] = $referrer;
+
 	switch($contact_options['on_send_form']) {
         case "only_save":
             __udesly_save_form_data($form_data);
@@ -77,11 +80,11 @@ function __udesly_save_form_data($form_data) {
 }
 
 function __udesly_send_form_data($message, $form_data, $settings, $silent_fail = false) {
-	$to = apply_filters('udesly/ajax/contact/mail_to', $settings["email_to"]);
+	$to = apply_filters('udesly/ajax/contact/mail_to', $settings["email_to"], $form_data);
 
-	$ccs = apply_filters('udesly/ajax/contact/mail_ccs', array());
+	$ccs = apply_filters('udesly/ajax/contact/mail_ccs', array(), $form_data);
 
-	$subject = apply_filters('udesly/ajax/contact/mail_subject', $settings["email_subject"]);
+	$subject = apply_filters('udesly/ajax/contact/mail_subject', $settings["email_subject"], $form_data);
 
 	$message = apply_filters('udesly/ajax/contact/mail_message', $message, $form_data);
 
