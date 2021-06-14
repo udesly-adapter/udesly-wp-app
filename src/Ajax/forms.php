@@ -111,7 +111,7 @@ function __udesly_send_form_data($message, $form_data, $settings, $silent_fail =
         $headers[] = "Reply-To: $name <$email>";
     }
 
-	$headers = apply_filters('udesly/ajax/contact/headers', $headers);
+	$headers = apply_filters('udesly/ajax/contact/headers', $headers, $form_data);
 
 	if ( !wp_mail( $to, $subject, $message, $headers ) ) {
 		if(!$silent_fail) {
