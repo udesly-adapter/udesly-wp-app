@@ -140,6 +140,9 @@ function udesly_ajax_lost_password() {
 	} else {
 		$login     = trim( $user_login );
 		$user_data = get_user_by( 'login', $login );
+		if ( empty( $user_data ) ) {
+			$errors->add( 'invalid_email', apply_filters('udesly/ajax/lost_password/invalid_email_message', __( 'There is no user registered with that email address.' )) );
+		}
 	}
 
 	do_action( 'lostpassword_post', $errors );
