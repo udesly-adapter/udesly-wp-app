@@ -83,3 +83,35 @@ function udesly_get_content_template($content) {
 	}
 
 }
+
+/**
+ * return current page number
+ *
+ * @return int|mixed
+ */
+function udesly_get_current_page_number() {
+	$paged = (get_query_var("paged")) ? get_query_var("paged") : 1;
+	return $paged;
+}
+
+/**
+*
+* return max pages number
+*
+* @return int
+*/
+function udesly_get_max_pages_number(){
+	global $wp_query;
+	return $wp_query->max_num_pages;
+}
+
+/**
+*
+* return post number
+*
+* @return int
+*/
+function udesly_get_posts_number() {
+	global $wp_query;
+	return $wp_query->found_posts;
+}

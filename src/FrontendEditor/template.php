@@ -100,6 +100,16 @@ $path = add_query_arg(["udesly_action" => "frontend-editor"],home_url( $wp->requ
             }
 
         </style>
+
+<?php
+
+$files = glob(UDESLY_PLUGIN_DIR_PATH . '/assets/frontend-editor/build/static/css/*.css');
+
+?>
+
+<?php foreach ($files as $file) : ?>
+    <link rel="stylesheet" href="<?php echo str_replace(UDESLY_PLUGIN_DIR_PATH . "/", UDESLY_PLUGIN_URI, $file); ?>" />
+<?php endforeach; ?>
     </head>
 <body>
 <div class="loader"><div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div></div>
@@ -108,7 +118,7 @@ $path = add_query_arg(["udesly_action" => "frontend-editor"],home_url( $wp->requ
 <div id="udesly-frontend-editor"></div>
 <?php
 
-$files = glob(UDESLY_PLUGIN_DIR_PATH . '/assets/frontend-editor/build/js/*.js');
+$files = glob(UDESLY_PLUGIN_DIR_PATH . '/assets/frontend-editor/build/static/js/*.js');
 
 $runtime = $files[count($files) - 1];
 
