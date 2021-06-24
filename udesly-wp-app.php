@@ -74,6 +74,11 @@ add_action('plugins_loaded', function () {
 }, 10);
 
 
-add_action('init', function() {
-
-});
+if (is_admin()) {
+	require 'plugin-update-checker/plugin-update-checker.php';
+	$update_checker = Puc_v4_Factory::buildUpdateChecker(
+		'https://github.com/udesly-adapter/udesly-wp-app',
+		__FILE__,
+		'udesly-wp-app'
+	);
+}
