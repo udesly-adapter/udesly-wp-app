@@ -3,7 +3,7 @@
  * Plugin Name: Udesly App
  * Plugin URI: https://udesly.com
  * Description: A companion app for the Udesly App
- * Version: 3.0.0
+ * Version: 3.0.0@beta1
  * Author: Udesly
  * Author URI: https://udesly.com
  * Text Domain: udesly
@@ -23,7 +23,7 @@ include_once __DIR__ . '/misc/index.php';
 
 define( 'UDESLY_PLUGIN_DIR_PATH', __DIR__ );
 
-define( 'UDESLY_PLUGIN_VERSION', "3.0.0" );
+define( 'UDESLY_PLUGIN_VERSION', "3.0.0@beta1" );
 
 define( 'UDESLY_PLUGIN_URI', plugin_dir_url( __FILE__ ) );
 
