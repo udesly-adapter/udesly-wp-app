@@ -8,14 +8,14 @@
     --success-checkout-notice-color: white;
 }
 
-.w-video.w-embed {
+/*.w-video.w-embed {
     position: relative;
     padding-bottom: 56.25%;
     padding-top: 30px;
     overflow: hidden;
     max-width: 100%;
     height: auto;
-}
+}*/
 
 table.woocommerce-grouped-product-list.group_table td {
     padding: var(--table-td-padding);
