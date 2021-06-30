@@ -353,7 +353,7 @@ function __udesly_send_login_email_for_user( $uid, $email, $title = "Login" ) {
 	$token_expiration_interval = apply_filters('udesly/params/token_expiration', 300);
 
 	if ( $last_attempt > ($time - $token_expiration_interval)) {
-		return new WP_Error(apply_filters("udesly/ajax/login/too_many_attempts",__("Try again later! Limit on email requests reached, try again in few minutes")));
+		return new WP_Error("too_many_attempts", apply_filters("udesly/ajax/login/too_many_attempts",__("Try again later! Limit on email requests reached, try again in few minutes")));
 	}
 
 	// Salt
@@ -484,7 +484,7 @@ function __udesly_send_change_email_for_user( $uid, $email ) {
 	$token_expiration_interval = apply_filters('udesly/params/token_expiration', 300);
 
 	if ( $last_attempt > ($time - $token_expiration_interval)) {
-		return new WP_Error(apply_filters("udesly/ajax/login/too_many_attempts",__("Try again later! Limit on email requests reached, try again in few minutes")));
+		return new WP_Error("too_many_attempts", apply_filters("udesly/ajax/login/too_many_attempts",__("Try again later! Limit on email requests reached, try again in few minutes")));
 	}
 
 	// Salt
