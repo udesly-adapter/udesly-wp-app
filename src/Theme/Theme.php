@@ -304,7 +304,9 @@ final class Theme {
 				wp_localize_script('udesly_country_select', 'udesly_country_select', [
 					'countries_states' => wp_json_encode( array_merge( WC()->countries->get_allowed_country_states(), WC()->countries->get_shipping_country_states() ) ),
 					'countries_options' => wp_json_encode(WC()->countries->get_allowed_countries()),
-					'vat_countries' => wp_json_encode((new \WC_Countries())->get_vat_countries())
+					'vat_countries' => wp_json_encode((new \WC_Countries())->get_vat_countries()),
+					'billing_country' => udesly_get_user_meta('billing_country'),
+					'billing_state' => udesly_get_user_meta('billing_state')
 				] );
 			}
 		});

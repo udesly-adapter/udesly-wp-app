@@ -16,15 +16,20 @@
 
     const vatField = document.getElementById('vat_number_field');
 
-    stateField.setAttribute('data-initial-value', stateField.getAttribute('value'));
+    const initialCountry = window.udesly_country_select.billing_country;
+
+    const initialState = window.udesly_country_select.billing_state;
+
+    stateField.setAttribute('data-initial-value', initialState);
 
     stateField.removeAttribute('value');
+
 
     const codiceFiscaleField = document.getElementById('codice_fiscale_field');
     const codicePecField = document.getElementById('codice_pec_field');
 
     if (countryField) {
-        const country = countryField.getAttribute('value');
+        const country = initialCountry;
         countryField.removeAttribute('value');
 
         for (let key in countriesOptions) {
