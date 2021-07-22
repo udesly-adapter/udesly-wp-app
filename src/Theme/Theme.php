@@ -299,7 +299,7 @@ final class Theme {
 			wp_register_script('udesly_country_select', UDESLY_PLUGIN_URI . 'assets/frontend/utils/country-select.js', [], UDESLY_PLUGIN_VERSION, true);
 
 
-			if (function_exists('WC')) {
+			if (function_exists('WC') && WC()->countries) {
 
 				wp_localize_script('udesly_country_select', 'udesly_country_select', [
 					'countries_states' => wp_json_encode( array_merge( WC()->countries->get_allowed_country_states(), WC()->countries->get_shipping_country_states() ) ),

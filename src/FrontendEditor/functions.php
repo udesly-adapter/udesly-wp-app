@@ -4,9 +4,10 @@ if (!function_exists('udesly_sanitize_url')) {
 
     function udesly_sanitize_url( string $url ) {
 
-       if (\Udesly\Utils\StringUtils::starts_with($url, '/')) {
+       if (\Udesly\Utils\StringUtils::starts_with($url, '/') || \Udesly\Utils\StringUtils::starts_with($url, '#')) {
            return esc_url($url);
        }
+      
 	    if(\Udesly\Utils\StringUtils::contains($url, ':')) {
             return esc_url($url);
         }
