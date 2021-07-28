@@ -86,7 +86,7 @@ final class Theme {
 			$lock_key = "udesly_lock" . $type . $start_index . $chunks;
 
 			if (get_transient($lock_key)) {
-				return; // already fired
+				return new \WP_Error('stop');
 			}
 
 			set_transient($lock_key, "true");
@@ -268,8 +268,11 @@ final class Theme {
 
 		$type = sanitize_text_field($_POST['import_type']);
 
-		$this->import_data($type, $next_index);
+		$res = $this->import_data($type, $next_index);
 
+		if (is_wp_error($res)) {
+			wp_send_json_error($res);
+		}
 
 
 		wp_send_json_success($this->get_background_import_status());
