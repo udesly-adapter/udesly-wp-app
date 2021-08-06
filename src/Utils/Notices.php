@@ -20,7 +20,7 @@ final class Notices {
 		return sprintf( '<div class="%1$s"><p><strong>Udesly </strong>%2$s</p></div>', esc_attr( $class ), esc_html( $args['message'] ) );
 	}
 
-	static function enqueue_notice(array $args, ?string $id = null) {
+	static function enqueue_notice(array $args, string $id = null) {
 
 		$new_notices = self::get_pending_notices();
 		if ($id) {

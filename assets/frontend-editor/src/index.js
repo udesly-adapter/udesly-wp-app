@@ -5,7 +5,8 @@ import './app.css';
 import {onIframeLoad} from "./utils/on-iframe-load";
 
 const iframe = document.getElementById("frontend-editor-frame");
-if (  iframe.contentWindow.readyState  === 'complete' ) {
+const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+if (  iframeDoc.readyState  === 'complete' ) {
     //iframe.contentWindow.alert("Hello");
     onIframeLoad(iframe);
 } else {

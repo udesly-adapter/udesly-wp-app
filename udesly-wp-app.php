@@ -8,7 +8,7 @@
  * Author URI: https://udesly.com
  * Text Domain: udesly
  * Domain Path: /i18n/languages/
- * Requires PHP: 7.0
+ * Requires PHP: 7.1
  *
  * @package Udesly
  */
