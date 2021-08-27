@@ -10,9 +10,13 @@ if (  iframeDoc.readyState  === 'complete' ) {
     //iframe.contentWindow.alert("Hello");
     onIframeLoad(iframe);
 } else {
-    iframe.onload = function(){
-        onIframeLoad(iframe);
-    };
+    let loadedInterval = setInterval(() => {
+        console.log(iframeDoc.readyState);
+        if (iframeDoc.readyState  === 'complete') {
+            onIframeLoad(iframe);
+            clearInterval(loadedInterval)
+        }
+    }, 150)
 }
 
 document.addEventListener('udesly-fe.init', e => {
