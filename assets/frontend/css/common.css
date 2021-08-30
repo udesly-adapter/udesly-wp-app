@@ -143,7 +143,7 @@ span.woocommerce-terms-and-conditions-checkbox-text {
 }
 
 .udesly-hidden {
-    display: none;
+    display: none!important;
 }
 
 body #add_payment_method #payment, body .woocommerce-cart #payment, body .woocommerce-checkout #payment {

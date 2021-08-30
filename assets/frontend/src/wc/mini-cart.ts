@@ -23,7 +23,6 @@ export default class MiniCart {
 
         this.openOnProductAdded = this.wrapper.hasAttribute('data-open-product');
 
-        console.log(this.openOnProductAdded, this.wrapper);
         this.openOnHover = this.wrapper.hasAttribute('data-open-on-hover');
 
         this.emptyState = this.wrapper.querySelector('.w-commerce-commercecartemptystate');

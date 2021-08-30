@@ -10,10 +10,13 @@ export default class Variations {
     private variationElements: NodeListOf<Element>;
     private hasVariationSwatches: boolean;
     private selectedClassName = "w--ecommerce-pill-selected";
+    private product_id: string;
 
     constructor(private addToCartForm: HTMLFormElement, private udesly: Udesly<WooCommerceRootModel>) {
         this.variationsData = JSON.parse(addToCartForm.dataset['product_variations']);
         this.variationInput = addToCartForm.querySelector('[name="variation_id"]');
+        this.product_id = addToCartForm.dataset.product_id;
+        addToCartForm._udeslyAddToCart = this;
 
         this.hasVariationSwatches = !!this.addToCartForm.querySelectorAll('[data-node-type="add-to-cart-option-pill-group"]').length;
 
@@ -21,15 +24,16 @@ export default class Variations {
             if (e.target.tagName !== "SELECT") {
                 return;
             }
-            this.changeVariation();
+            this.changeVariation(e.target.name, e.target.value);
         });
 
         if (this.hasVariationSwatches) {
             this.handleVariationSwatchesEvents();
         }
 
-        this.udesly.on("woocommerce/changeVariation", variation => {
-            this.onChangeVariation(variation);
+        this.udesly.on("woocommerce/changeVariation", data => {
+            if (data.productId == this.product_id)
+            this.onChangeVariation(data.variation);
         });
 
         if (this.addToCartForm.closest('.w-dyn-item')) {
@@ -149,7 +153,7 @@ export default class Variations {
         });
     }
 
-    changeVariation() {
+    changeVariation(name, value) {
         const attributes = this.getAttributes();
 
         const variation = this.variationsData.find( variant => {
@@ -159,6 +163,17 @@ export default class Variations {
         })
         if (variation) {
             this.currentVariation = variation;
+        } else {
+            const firstVariation = this.variationsData.find(variant => variant.attributes[name] == value);
+            if (firstVariation) {
+                this.currentVariation = firstVariation
+                Object.keys(firstVariation.attributes).forEach( attributeKey => {
+                    const select = this.addToCartForm.querySelector(`#${attributeKey.replace('attribute_', '')}`);
+                    if (select) {
+                        select.value = firstVariation.attributes[attributeKey];
+                    }
+                });
+            }
         }
     }
 
@@ -188,6 +203,6 @@ export default class Variations {
     set currentVariation(variation) {
         this._currentVariation = variation;
         this.variantId = variation.variation_id;
-        this.udesly.dispatch("woocommerce/changeVariation", variation);
+        this.udesly.dispatch("woocommerce/changeVariation", {variation, productId: this.product_id});
     }
 }

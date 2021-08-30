@@ -265,6 +265,9 @@ class WebflowCommerce {
 				$current_product['remove_url'] = wc_get_cart_remove_url($cart_item_key);
 				$current_product['quantity'] = $cart_item['quantity'];
 				$current_product['price'] = $product_price;
+				$current_product['stock_quantity'] = $_product->get_stock_quantity();
+				$current_product['manage_stock'] = wc_string_to_bool($_product->get_manage_stock());
+				$current_product['regular_price'] = $_product->is_on_sale() ? wc_price($_product->get_regular_price()) : "";
 				$current_product['subtotal'] = wc_price($cart_item['line_total']);
 				$current_product['total'] = wc_price($cart_item['line_total'] + $cart_item['line_tax']);
 				$current_product['key'] = $cart_item_key;
