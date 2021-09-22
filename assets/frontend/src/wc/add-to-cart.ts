@@ -32,6 +32,14 @@ function initAddToCarts(udesly: Udesly<WooCommerceRootModel>) {
 
         if (productType == "variable") {
             new Variations(addToCartForm as HTMLFormElement, udesly);
+        } else {
+            if (addToCart.dataset.instock != "1") {
+                addToCartForm.style.display = "none";
+                const outOfStock = addToCart.querySelector('.w-commerce-commerceaddtocartoutofstock')
+                if (outOfStock) {
+                    outOfStock.style.display = "";
+                }
+            }
         }
 
         switch (productType) {

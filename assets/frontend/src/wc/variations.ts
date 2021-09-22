@@ -7,7 +7,7 @@ export default class Variations {
 
     private variationsData: any;
     private _currentVariation: any;
-    private variationElements: NodeListOf<Element>;
+    private variationElements: NodeListOf<HTMLElement>;
     private hasVariationSwatches: boolean;
     private selectedClassName = "w--ecommerce-pill-selected";
     private product_id: string;
@@ -21,10 +21,10 @@ export default class Variations {
         this.hasVariationSwatches = !!this.addToCartForm.querySelectorAll('[data-node-type="add-to-cart-option-pill-group"]').length;
 
         this.addToCartForm.addEventListener('change', e => {
-            if (e.target.tagName !== "SELECT") {
+            if ((e.target as HTMLElement).tagName !== "SELECT") {
                 return;
             }
-            this.changeVariation(e.target.name, e.target.value);
+            this.changeVariation((e.target as HTMLSelectElement).name, (e.target as HTMLSelectElement).value);
         });
 
         if (this.hasVariationSwatches) {
@@ -37,9 +37,9 @@ export default class Variations {
         });
 
         if (this.addToCartForm.closest('.w-dyn-item')) {
-            this.variationElements = this.addToCartForm.closest('.w-dyn-item').querySelectorAll('[data-variation-prop]');
+            this.variationElements = this.addToCartForm.closest('.w-dyn-item').querySelectorAll<HTMLElement>('[data-variation-prop]');
         } else {
-            this.variationElements = document.querySelectorAll('[data-variation-prop]:not(.w-dyn-item [data-variation-prop])');
+            this.variationElements = document.querySelectorAll<HTMLElement>('[data-variation-prop]:not(.w-dyn-item [data-variation-prop])');
         }
 
         this.variationElements.forEach( el => {
@@ -56,12 +56,12 @@ export default class Variations {
     }
 
     handleVariationSwatchesEvents() {
-        this.addToCartForm.querySelectorAll('[data-node-type="add-to-cart-option-pill"]').forEach( pill => {
+        this.addToCartForm.querySelectorAll<HTMLElement>('[data-node-type="add-to-cart-option-pill"]').forEach( pill => {
             const pillOptionName = pill.dataset.optionName;
             const attributeName = pill.closest('[data-node-type="add-to-cart-option-pill-group"]').getAttribute('aria-label');
 
             pill.addEventListener('click', e => {
-              const select = this.addToCartForm.querySelector(`#${attributeName}`);
+              const select = this.addToCartForm.querySelector<HTMLSelectElement>(`#${attributeName}`);
               if (select) {
                   select.value = pillOptionName;
                   select.dispatchEvent(new Event('change', {bubbles: true}));
@@ -71,6 +71,16 @@ export default class Variations {
     }
 
     onChangeVariation(variation) {
+
+        if(variation.is_in_stock) {
+            this.addToCartForm.parentElement.querySelectorAll<HTMLElement>('.w-commerce-commerceaddtocartoutofstock').forEach(e => {
+                e.style.display = "none"
+            })
+        } else {
+            this.addToCartForm.parentElement.querySelectorAll<HTMLElement>('.w-commerce-commerceaddtocartoutofstock').forEach(e => {
+                e.style.display = ""
+            })
+        }
 
         if (this.hasVariationSwatches) {
             this.addToCartForm.querySelectorAll(`.${this.selectedClassName}`).forEach(el => el.classList.remove(this.selectedClassName));
@@ -141,6 +151,7 @@ export default class Variations {
                                 });
                                 items.append(item);
                             }
+                            //@ts-ignore
                             Webflow.require('lightbox') && Webflow.require('lightbox').ready()
 
                         }
@@ -155,7 +166,6 @@ export default class Variations {
 
     changeVariation(name, value) {
         const attributes = this.getAttributes();
-
         const variation = this.variationsData.find( variant => {
             return Object.keys(variant.attributes).every( attributeKey => {
                 return attributes[attributeKey] == variant.attributes[attributeKey];
@@ -168,7 +178,7 @@ export default class Variations {
             if (firstVariation) {
                 this.currentVariation = firstVariation
                 Object.keys(firstVariation.attributes).forEach( attributeKey => {
-                    const select = this.addToCartForm.querySelector(`#${attributeKey.replace('attribute_', '')}`);
+                    const select = this.addToCartForm.querySelector<HTMLSelectElement>(`#${attributeKey.replace('attribute_', '')}`);
                     if (select) {
                         select.value = firstVariation.attributes[attributeKey];
                     }

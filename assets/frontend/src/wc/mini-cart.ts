@@ -39,14 +39,19 @@ export default class MiniCart {
 
     initStoreEvents() {
         this.udesly.on("woocommerce/toggleCart", () => {
-            if (window.getComputedStyle(this.wrapper).display == "none") {
+            const rect = this.wrapper.getBoundingClientRect();
+            if (rect.width == 0 || rect.height == 0) {
                 return;
             }
-            this.wrapper.dispatchEvent(new CustomEvent("wf-change-cart-state", {
-                detail: {
-                    open: this.udesly.getState().woocommerce.cartOpen
-                }
-            }))
+            setTimeout(() => {
+                const cartOpen = this.udesly.getState().woocommerce.cartOpen
+                this.wrapper.dispatchEvent(new CustomEvent("wf-change-cart-state", {
+                    detail: {
+                        open: cartOpen
+                    }
+                }))
+            }, 1)
+
         })
 
         this.udesly.on("woocommerce/cartChanged", () => {
@@ -55,7 +60,12 @@ export default class MiniCart {
 
         if (this.openOnProductAdded) {
             this.udesly.on("woocommerce/addedToCart", () => {
-               this.udesly.dispatch("woocommerce/toggleCart");
+                this.wrapper.dispatchEvent(new CustomEvent("wf-change-cart-state", {
+                    detail: {
+                        open: true
+                    }
+                }))
+                this.udesly.dispatch("woocommerce/setCartOpen", true);
             });
         }
 
@@ -112,7 +122,9 @@ export default class MiniCart {
 
     initDomEvents() {
 
-        this.wrapper.addEventListener('wf-change-cart-state', (e : CustomEvent) => handleChangeCartStateEvent(e, this.wrapper));
+        this.wrapper.addEventListener('wf-change-cart-state', (e : CustomEvent) => {
+            handleChangeCartStateEvent(e, this.wrapper);
+        });
         getElementsByDataNodeType("commerce-cart-open-link", this.wrapper).forEach(openLink => {
             openLink.addEventListener("click", () => {
                 this.udesly.dispatch("woocommerce/toggleCart")

@@ -21,6 +21,9 @@ export const woocommerce = createModel<WooCommerceRootModel>()({
         toggleCart(state) {
             return {...state, cartOpen: !state.cartOpen};
         },
+        setCartOpen(state, payload) {
+            return {...state, cartOpen: payload};
+        },
         cartChanged(state) {
             const domDataEl = document.getElementById('udesly-wc-mini-cart-elements');
             const domState = JSON.parse(domDataEl.textContent);
