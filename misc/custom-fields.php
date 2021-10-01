@@ -277,6 +277,8 @@ if (!function_exists( '__udesly_prepare_field')) {
 					$results[] = $result;
 				}
 				return $results;
+            case "RichText":
+                return do_shortcode($field_value);
 			default:
 				return $field_value;
 		}
