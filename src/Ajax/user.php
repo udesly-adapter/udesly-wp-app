@@ -433,7 +433,7 @@ function __udesly_passwordless_check_auth_url() {
 		wp_die($errors);
 	}
 
-	wp_set_auth_cookie($uid);
+	wp_set_auth_cookie($uid, true, is_ssl());
 	delete_user_meta($uid, "_udesly_temp_token");
 	delete_user_meta($uid, "_udesly_temp_token_expiration");
 	delete_user_meta($uid, "_udesly_temp_token_last_attempt");
