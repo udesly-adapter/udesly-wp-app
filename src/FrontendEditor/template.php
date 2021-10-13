@@ -19,6 +19,7 @@ $path = add_query_arg(["udesly_action" => "frontend-editor"],home_url( $wp->requ
     <head>
         <link rel="preconnect" href="https://fonts.gstatic.com">
         <link href="https://fonts.googleapis.com/css2?family=Jost&display=swap" rel="stylesheet">
+        <?php if (is_ssl()) : ?><meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests"><?php endif; ?>
         <style>
             body:not(.loaded) iframe, body:not(.loaded) #udesly-frontend-editor {
                 display: none;
