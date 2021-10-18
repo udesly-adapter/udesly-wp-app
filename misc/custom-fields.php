@@ -278,6 +278,11 @@ if (!function_exists( '__udesly_prepare_field')) {
 				}
 				return $results;
             case "RichText":
+            case "PlainText":
+                $autop = apply_filters('udesly/params/autop', true);
+                if ($autop) {
+                    return wpautop(do_shortcode($field_value));
+                }
                 return do_shortcode($field_value);
 			default:
 				return $field_value;
