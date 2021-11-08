@@ -44,7 +44,17 @@ if (!function_exists('udesly_get_price')) {
 			$variant = $product;
 		}
 
-		return udesly_format_price($variant->get_price());
+        $taxes = 'incl' === get_option( 'woocommerce_tax_display_shop' );
+
+		if ($taxes) {
+		    return udesly_format_price(wc_get_price_including_tax($variant, [
+		            "price" => $variant->get_price()
+            ]));
+        } else {
+            return udesly_format_price(wc_get_price_excluding_tax($variant, [
+                "price" => $variant->get_price()
+            ]));
+        }
 	}
 
 }
@@ -58,8 +68,18 @@ if (!function_exists('udesly_get_compare_at_price')) {
 			$variant = $product;
 		}
 
+        $taxes = 'incl' === get_option( 'woocommerce_tax_display_shop' );
+
 		if ($variant->is_on_sale()) {
-			return udesly_format_price($variant->get_regular_price());
+            if ($taxes) {
+                return udesly_format_price(wc_get_price_including_tax($variant, [
+                    "price" => $variant->get_regular_price()
+                ]));
+            } else {
+                return udesly_format_price(wc_get_price_excluding_tax($variant, [
+                    "price" => $variant->get_regular_price()
+                ]));
+            }
 		}
 
 		return "";
