@@ -61,7 +61,7 @@ export default class Variations {
             const attributeName = pill.closest('[data-node-type="add-to-cart-option-pill-group"]').getAttribute('aria-label');
 
             pill.addEventListener('click', e => {
-              const select = this.addToCartForm.querySelector<HTMLSelectElement>(`#${attributeName}`);
+              const select = this.addToCartForm.querySelector<HTMLSelectElement>(`[id="${attributeName}"]`);
               if (select) {
                   select.value = pillOptionName;
                   select.dispatchEvent(new Event('change', {bubbles: true}));
@@ -178,7 +178,7 @@ export default class Variations {
             if (firstVariation) {
                 this.currentVariation = firstVariation
                 Object.keys(firstVariation.attributes).forEach( attributeKey => {
-                    const select = this.addToCartForm.querySelector<HTMLSelectElement>(`#${attributeKey.replace('attribute_', '')}`);
+                    const select = this.addToCartForm.querySelector<HTMLSelectElement>(`[id="${attributeKey.replace('attribute_', '')}"]`);
                     if (select) {
                         select.value = firstVariation.attributes[attributeKey];
                     }
