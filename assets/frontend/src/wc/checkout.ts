@@ -89,7 +89,7 @@ export default class Checkout {
                e.stopPropagation();
                e.stopImmediatePropagation();
                this.udesly.dispatch("woocommerce/applyCoupon", {
-                   coupon_code: couponForm.querySelector('input[name=coupon_code]').value
+                   coupon_code: this.checkoutWrapper.querySelector('input[name=coupon_code]').value
                });
            }, true);
         }
