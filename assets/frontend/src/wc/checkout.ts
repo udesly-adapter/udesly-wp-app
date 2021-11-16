@@ -35,9 +35,11 @@ export default class Checkout {
 
     initDOMEvents() {
         this.checkoutWrapper.querySelectorAll('[data-node-type="commerce-checkout-place-order-button"]').forEach(el => {
-            el.addEventListener('click', e => {
-                this.checkoutWrapper.dispatchEvent(new Event('submit', {bubbles: true}))
-            })
+            if (el.tagName == "A") {
+                el.addEventListener('click', e => {
+                    this.checkoutWrapper.dispatchEvent(new Event('submit', {bubbles: true}))
+                })
+            }
         })
         this.checkoutWrapper.addEventListener('change', () => {
             this.hideErrorState();
