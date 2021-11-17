@@ -735,10 +735,10 @@ function udesly_wc_format_dimension( $dimension ) {
 function udesly_wc_get_variable_product_data() {
 	global $product;
 
-	$get_variations = count( $product->get_children() ) <= apply_filters( 'woocommerce_ajax_variation_threshold', 30, $product );
+	$get_variations = count( $product->get_children() ) <= apply_filters( 'woocommerce_ajax_variation_threshold', 250, $product );
 
 	$variation_data = [
-		'available_variations' => $get_variations ? $product->get_available_variations() : false,
+		'available_variations' => $get_variations ? $product->get_available_variations() : [],
 		'attributes'           => $product->get_variation_attributes(),
 		'selected_attributes'  => $product->get_default_attributes(),
 	];
