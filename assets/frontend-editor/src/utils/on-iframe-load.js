@@ -55,46 +55,14 @@ el.addEventListener('click', e => {
     }
 })
 
-export function onIframeLoad(iframe) {
-    const doc = iframe.contentDocument;
-    const style = doc.createElement('style');
-    style.textContent = `.fe-focused { box-shadow: 0 0 0 2px #2296fe; border-radius: 5px; }  ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:transparent;border-style:solid;border-width:0}::-webkit-scrollbar-thumb{border-radius:100px;background:#2296fe}`
-    doc.head.append(style);
-    doc.addEventListener('click', e => {
-        e.preventDefault();
-
-        e.stopPropagation();
-
-        const target = e.target.matches('[data-link],a') ? e.target: e.target.closest('[data-link]') || e.target.closest('a');
-
-        if (target && !target.dataset.wTab) {
-
-
-                const href = target.getAttribute('href');
-                if (!href.includes("/")) {
-                    document.dispatchEvent(new CustomEvent('udesly-fe.notice', {
-                        detail: {
-                            type: 'info',
-                            message: `This link will go to a page with slug: "${href}"`
-                        }
-                    }))
-                } else {
-                    document.dispatchEvent(new CustomEvent('udesly-fe.notice', {
-                        detail: {
-                            type: 'info',
-                            message: `This link will go to: "${href}"`
-                        }
-                    }))
-                }
-
-
-        }
-    })
+export function onIframeLoad() {
+    console.log('called');
+    const doc = document.getElementById('frontend-editor-frame').contentDocument;
 
     const config = JSON.parse(doc.getElementById('udesly-fe-data').textContent);
 
-    dataChanger = new DataChanger(iframe);
-    cache = new WeakCache(iframe.contentDocument);
+    dataChanger = new DataChanger();
+    cache = new WeakCache();
 
     const pageConfig = parseConfig(config.page, "Edit Page", config.template);
 
@@ -104,7 +72,7 @@ export function onIframeLoad(iframe) {
         detail: {
             pageConfig,
             globalConfig,
-            iframe
+            iframe: document.getElementById('frontend-editor-frame')
         }
     }))
 
@@ -291,7 +259,7 @@ function parseConfig(config, label = 'Edit Page', template) {
         }
         fieldGroups.textarea.fields.push({
             name: key,
-            component: 'html',
+            component: 'textarea',
             parse: (value, name) => {
                 dataChanger.changeInnerHTML(name, value);
                 return value;
@@ -310,7 +278,7 @@ function parseConfig(config, label = 'Edit Page', template) {
         }
         fieldGroups.richtext.fields.push({
             name: key,
-            component: 'html',
+            component: 'textarea',
             imageProps: {
                 parse: (media) => media.previewSrc,
                 directory: () => "",
@@ -334,15 +302,14 @@ function parseConfig(config, label = 'Edit Page', template) {
 class WeakCache {
     cache = {}
 
-    constructor(iframe) {
-        this.doc = iframe;
+    constructor() {
     }
 
 
     get(key) {
         const [type, name] = key.split('.');
-        if (!this.cache[key]) {
-            this.cache[key] = this.doc.querySelectorAll(`[data-${type}="${name}"]`);
+        if (!this.cache[key] || !this.cache[key].length) {
+            this.cache[key] = document.querySelector('#frontend-editor-frame').contentDocument.querySelectorAll(`[data-${type}="${name}"]`);
         }
         return this.cache[key];
     }
@@ -350,8 +317,7 @@ class WeakCache {
 
 class DataChanger {
 
-    constructor(iframe) {
-        this.document = iframe.contentDocument;
+    constructor() {
     }
 
     changeInnerHTML(name, value) {
