@@ -284,10 +284,14 @@ class WebflowCommerce {
 
 		wc_clear_notices();
 
+		$taxes = wc_tax_enabled() && $cart->display_prices_including_tax();
+
+		$total = wc_price( $taxes ? $cart->get_cart_contents_total() + $cart->get_cart_contents_tax() : $cart->get_cart_contents_total() );
+
 		return [
 			'count' => $cart->get_cart_contents_count(),
 			'subtotal' => $cart->get_cart_subtotal(),
-			'total' => $cart->get_cart_total(),
+			'total' => $total,
 			'items' => $cart_items,
             'notices' => $notices
 		];
