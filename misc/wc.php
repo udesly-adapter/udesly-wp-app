@@ -409,11 +409,26 @@ function udesly_wc_get_order_review_extra_items() {
 
 		if (isset($available_methods[$chosen_method])) {
 		    $method = $available_methods[$chosen_method];
-			$extra_items[] = (object) [
-				'name' => $method->get_label(),
-				'description' => '',
-				'price' => $method->cost > 0 ? wc_price($method->cost) : "",
-			];
+		    if (wc_tax_enabled() && WC()->cart->display_prices_including_tax()) {
+                $price = $method->cost > 0 ? $method->cost : 0;
+                if ($method->taxes) {
+                    foreach ($method->taxes as $tax_id => $tax_price) {
+                        $price+=$tax_price;
+                    }
+                }
+                $extra_items[] = (object) [
+                    'name' => $method->get_label(),
+                    'description' => '',
+                    'price' => $price > 0 ? wc_price($price) : "",
+                ];
+            } else {
+                $extra_items[] = (object) [
+                    'name' => $method->get_label(),
+                    'description' => '',
+                    'price' => $method->cost > 0 ? wc_price($method->cost) : "",
+                ];
+            }
+
         }
 
 	}
