@@ -42,7 +42,9 @@ final class Notices {
 	}
 
 	static function clear_notices() {
-		delete_transient('_udesly_pending_notices');
+		if (get_transient('_udesly_pending_notices')) {
+			delete_transient('_udesly_pending_notices');
+		}
 	}
 
 	static function show_notices() {
