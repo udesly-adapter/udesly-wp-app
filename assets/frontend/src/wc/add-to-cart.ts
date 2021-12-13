@@ -46,8 +46,9 @@ function initAddToCarts(udesly: Udesly<WooCommerceRootModel>) {
             case "simple":
                 addToCartForm._udeslyGetData = function() {
                     const product_id = this.dataset.skuId;
-                    const quantity = this.querySelector('[name="quantity"]').value;
-                    return {product_id, quantity};
+                    const quantity = this.querySelector('[name="quantity"]') ? this.querySelector('[name="quantity"]').value : 1;
+                    const additional = Object.fromEntries(new FormData(this).entries()) || {};
+                    return {...additional, product_id, quantity};
                 }
                 break;
             case "variable":

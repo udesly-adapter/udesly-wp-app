@@ -140,7 +140,7 @@ export const woocommerce = createModel<WooCommerceRootModel>()({
             }
         },
       async addToCart(payload, state) {
-          let {type, variation_id, product_id, quantity, el, submitter, buyNow} = payload;
+          let {type, variation_id, product_id, quantity, el, submitter, buyNow, ...additional} = payload;
           if(timeout) {
               clearTimeout(timeout);
           }
@@ -166,8 +166,17 @@ export const woocommerce = createModel<WooCommerceRootModel>()({
           }
 
           const data = new FormData();
+          if (!quantity) {
+              quantity == 1;
+          }
           data.set('quantity', quantity);
           data.set('product_id', product_id);
+
+          if (additional && Object.keys(additional).length) {
+               for (let key in additional) {
+                   data.set(key, additional[key]);
+               }
+          }
 
           const response = await fetch(window.udesly_frontend_options.wc.wc_ajax_url.replace( '%%endpoint%%', 'udesly_add_to_cart' ), {
               method: "POST",
