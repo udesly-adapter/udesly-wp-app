@@ -76,7 +76,11 @@ export default class Variations {
             this.addToCartForm.parentElement.querySelectorAll<HTMLElement>('.w-commerce-commerceaddtocartoutofstock').forEach(e => {
                 e.style.display = "none"
             })
+            this.addToCartForm.parentElement.classList.remove('out-of-stock');
+            this.addToCartForm.parentElement.classList.add('in-stock');
         } else {
+            this.addToCartForm.parentElement.classList.remove('in-stock');
+            this.addToCartForm.parentElement.classList.add('out-of-stock');
             this.addToCartForm.parentElement.querySelectorAll<HTMLElement>('.w-commerce-commerceaddtocartoutofstock').forEach(e => {
                 e.style.display = ""
             })
