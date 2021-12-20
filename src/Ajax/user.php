@@ -172,7 +172,7 @@ function udesly_ajax_lost_password() {
 	$message .= __( 'If this was a mistake, just ignore this email and nothing will happen.' ) . "\r\n\r\n";
 	$message .= __( 'To reset your password, visit the following address:' ) . "\r\n\r\n";
 
-	$message .= esc_url_raw( $_POST['permalink'] . "?action=rp&key=$key&login=" . urlencode( $user_login ) ) . "\r\n";
+	$message .= esc_url_raw( $_POST['_referrer'] . "?action=rp&key=$key&login=" . urlencode( $user_login ) ) . "\r\n";
 
 	if ( is_multisite() ) {
 		$blogname = $GLOBALS['current_site']->site_name;
