@@ -47,13 +47,15 @@ function initAddToCarts(udesly: Udesly<WooCommerceRootModel>) {
                 addToCartForm._udeslyGetData = function() {
                     const product_id = this.dataset.skuId;
                     const quantity = this.querySelector('[name="quantity"]') ? this.querySelector('[name="quantity"]').value : 1;
-                    const additional = Object.fromEntries(new FormData(this).entries()) || {};
+                    //@ts-ignore
+                    const additional = Object.fromEntries(new URLSearchParams(new FormData(this)).entries())
                     return {...additional, product_id, quantity};
                 }
                 break;
             case "variable":
                 addToCartForm._udeslyGetData = function() {
-                    return Object.fromEntries(new FormData(this).entries());
+                      //@ts-ignore
+                    return Object.fromEntries(new URLSearchParams(new FormData(this)).entries())
                 }
                 break;
         }
