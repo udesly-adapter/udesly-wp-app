@@ -47,7 +47,7 @@ export default function wp(udesly: Udesly<RootModel>) {
         }
 
         wrapper.onFormError = function(message) {
-            errorMessage.textContent = (message || "Failed to send form").toString();
+            errorMessage.innerHTML = (message || "Failed to send form").toString();
             error.style.display = "inherit";
             if (submit) {
                 submit.value = submit.dataset['value'];
