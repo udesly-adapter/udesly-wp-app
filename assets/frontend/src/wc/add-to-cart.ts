@@ -54,6 +54,13 @@ function initAddToCarts(udesly: Udesly<WooCommerceRootModel>) {
                 break;
             case "variable":
                 addToCartForm._udeslyGetData = function() {
+
+                    if (this.querySelectorAll('[id][name$="[]"]').length > 0) {
+                        const clone = this.cloneNode(true);
+                        clone.querySelectorAll('[id][name$="[]"]').forEach(el => el.name = el.name.slice(0,-2) + "[" + el.id + "]")
+                        //@ts-ignore
+                        return Object.fromEntries(new URLSearchParams(new FormData(clone)).entries())
+                    }
                       //@ts-ignore
                     return Object.fromEntries(new URLSearchParams(new FormData(this)).entries())
                 }
