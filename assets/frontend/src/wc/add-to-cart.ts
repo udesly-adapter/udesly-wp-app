@@ -48,6 +48,13 @@ function initAddToCarts(udesly: Udesly<WooCommerceRootModel>) {
                     const product_id = this.dataset.skuId;
                     const quantity = this.querySelector('[name="quantity"]') ? this.querySelector('[name="quantity"]').value : 1;
                     //@ts-ignore
+                    if (this.querySelectorAll('[id][name$="[]"]').length > 0) {
+                        const clone = this.cloneNode(true);
+                        clone.querySelectorAll('[id][name$="[]"]').forEach(el => el.name = el.name.slice(0,-2) + "[" + el.id + "]")
+                        //@ts-ignore
+                        const additional = Object.fromEntries(new URLSearchParams(new FormData(clone)).entries())
+                        return {...additional, product_id, quantity};
+                    }
                     const additional = Object.fromEntries(new URLSearchParams(new FormData(this)).entries())
                     return {...additional, product_id, quantity};
                 }
