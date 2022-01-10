@@ -267,6 +267,8 @@ function udesly_ajax_edit_user() {
 		}
 		if ($value) {
 			update_user_meta($user_id, $key, $value);
+		} else {
+			update_user_meta($user_id, $key, "");
 		}
 	}
 
