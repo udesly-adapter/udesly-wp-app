@@ -42,7 +42,7 @@ export const wordpress = createModel<RootModel>()({
         async sendForm(payload, state) {
             const { parent, data } = payload;
             data.set('security', await getNonce());
-            if (Date.now() < (state.wordpress.time + 2000)) {
+            if (Date.now() < (state.wordpress.time + 100)) {
                 parent.onFormError && parent.onFormError("Anti Spam check failed!");
                 return;
             }

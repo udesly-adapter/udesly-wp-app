@@ -20,6 +20,12 @@ function udesly_ajax_generate_nonce() {
 
 function udesly_check_ajax_security() {
 
+	$disable = apply_filters('udesly/params/ajax_security', false);
+
+	if ($disable) {
+		return true;
+	}
+
 	if (!empty($_REQUEST['contact_me_by_fax_only']) && (bool) $_REQUEST['contact_me_by_fax_only'] == TRUE) {
 		wp_send_json_error("Spam Bot", 403);
 	}
