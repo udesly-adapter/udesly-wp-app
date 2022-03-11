@@ -197,7 +197,7 @@ final class Udesly
 		    }
 		    
 		    return $template;
-	    });
+	    }, 999, 1);
     }
 
     private function init()
