@@ -83,7 +83,11 @@ final class Udesly
 	   }
 	    global $pagenow;
 
-	    if ( $pagenow !== 'wp-login.php' && strpos($_SERVER['REQUEST_URI'], 'wp-admin') === false && ! current_user_can( 'administrator' ) ) {
+		$should_show_maintenance = $pagenow !== 'wp-login.php' && strpos($_SERVER['REQUEST_URI'], 'wp-admin') === false && ! current_user_can( 'administrator' );
+
+	    $should_show_maintenance = apply_filters('udesly/show-maintenance', $should_show_maintenance);
+
+	    if ( $should_show_maintenance ) {
 		    if ( file_exists( get_stylesheet_directory() . '/maintenance.php' ) ) {
 
 			    if($option == 'maintenance'){
