@@ -62,6 +62,8 @@ function udesly_ajax_register() {
 		'last_name'  => $last_name,
 	);
 
+
+
 	if( empty( $password ) || empty( $password_confirm ) ) {
 		wp_send_json_error( __( 'Password is a required field' ), 400 );
 	}
@@ -81,6 +83,8 @@ function udesly_ajax_register() {
 	if(!$valid) {
 		wp_send_json_error( apply_filters('udesly/ajax/register_password/strength_check_message', __( 'The password is invalid' ) ), 400 );
 	}
+
+	do_action('udesly/ajax/before_insert_user', $userdata );
 
 	$user_id = wp_insert_user( $userdata );
 
