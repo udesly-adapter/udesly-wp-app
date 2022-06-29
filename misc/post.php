@@ -51,7 +51,7 @@ if (! function_exists('_udesly_sanitize_image_obj')) {
 				if (\Udesly\Utils\StringUtils::contains($src, ':')) {
 					$args['srcset'] .= $src;
 				} else {
-					$args['srcset'] .= untrailingslashit(get_template_directory_uri()) . $src;
+					$args['srcset'] .= untrailingslashit(get_template_directory_uri()) . $src . ", ";
 				}
 			}
 		}
