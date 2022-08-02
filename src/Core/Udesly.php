@@ -70,6 +70,11 @@ final class Udesly
 
 	private function init_rest() {
 		add_action('admin_menu', [$this, 'add_rest_page']);
+		if (Rest::can_run()) {
+			add_action( 'rest_api_init', function() {
+				(Rest::instance())->register_routes();
+			});
+		}
 	}
 
 	public function add_rest_page() {
@@ -82,6 +87,7 @@ final class Udesly
 			    <h1><?php _e('Udesly APIs'); ?></h1>
 			    <?php if ($can_run) : ?>
 					<h2>Great!</h2>
+					<p><?php echo get_rest_url(null, "/udesly/v1"); ?>
 				<?php else : ?>
 					<h2>Your server is not able to run the Udesly plugin :(</h2>
 				<?php endif; ?>	
