@@ -2,10 +2,10 @@
 
 namespace Udesly\Core;
 
-use Udesly\Extensions\ACF\CustomFields;
 use Udesly\FrontendEditor\FrontendEditor;
 use Udesly\Theme\Theme;
 use Udesly\Extensions\WooCommerce\WebflowCommerce;
+use Udesly\Rest\Rest;
 
 defined('ABSPATH') || exit;
 
@@ -36,7 +36,7 @@ final class Udesly
 		    $this->init_hooks();
 		    $this->runned = true;
 		    $this->include_dependencies();
-		    define("UDESLY_VERSION", "3.0.0");
+		    define("UDESLY_VERSION", "3.1.0");
 	    }
     }
 
@@ -65,6 +65,30 @@ final class Udesly
 	    if ((Theme::instance())->is_valid()) {
 		    $this->init();
 	    }
+		$this->init_rest();
+    }
+
+	private function init_rest() {
+		add_action('admin_menu', [$this, 'add_rest_page']);
+	}
+
+	public function add_rest_page() {
+		
+
+    	add_submenu_page('options-general.php', __('Udesly APIs'), __('Udesly APIs'), 'administrator', 'udesly_rest_apis', function () {
+			$can_run = Rest::can_run();
+			?>
+		    <div class="wrap">
+			    <h1><?php _e('Udesly APIs'); ?></h1>
+			    <?php if ($can_run) : ?>
+					<h2>Great!</h2>
+				<?php else : ?>
+					<h2>Your server is not able to run the Udesly plugin :(</h2>
+				<?php endif; ?>	
+		    </div>
+
+		<?php
+	    });
     }
 
     private function admin_hooks()
@@ -112,6 +136,7 @@ final class Udesly
     }
 
     public function add_options_page() {
+		
     	add_submenu_page('options-general.php', __('Theme Settings'), __('Theme'), 'administrator', 'udesly_theme_settings', function () {
 			?>
 		    <div class="wrap">
@@ -153,7 +178,6 @@ final class Udesly
     	add_action('wp_loaded', [$this, "enable_temporary_mode"]);
 
 	    (Theme::instance())->public_hooks();
-	    (CustomFields::instance())->public_hooks();
 	    add_action('wp_enqueue_scripts', function () {
 	    	wp_register_script('udesly-frontend', UDESLY_PLUGIN_URI . 'assets/frontend/js/udesly-frontend-scripts.js', [], UDESLY_PLUGIN_VERSION, true);
 			wp_localize_script('udesly-frontend', 'udesly_frontend_options', apply_filters('udesly_localize_script_params',[
@@ -212,6 +236,7 @@ final class Udesly
 	    }
 
         if (is_admin()) {
+
 	        $this->admin_hooks();
         }
 	    $this->public_hooks();

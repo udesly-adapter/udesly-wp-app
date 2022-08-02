@@ -47,7 +47,6 @@ function deactivate_udesly_plugin() {
 
 function udesly() {
 	return \Udesly\Core\Udesly::instance();
-
 }
 
 udesly()->run();
