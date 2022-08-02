@@ -3,7 +3,7 @@
  * Plugin Name: Udesly App
  * Plugin URI: https://udesly.com
  * Description: A companion app for the Udesly App
- * Version: 3.0.0@beta37
+ * Version: 3.1.0
  * Author: Udesly
  * Author URI: https://udesly.com
  * Text Domain: udesly
@@ -23,7 +23,7 @@ include_once __DIR__ . '/misc/index.php';
 
 define( 'UDESLY_PLUGIN_DIR_PATH', __DIR__ );
 
-define( 'UDESLY_PLUGIN_VERSION', "3.0.0@beta37" );
+define( 'UDESLY_PLUGIN_VERSION', "3.1.0" );
 
 define( 'UDESLY_PLUGIN_URI', plugin_dir_url( __FILE__ ) );
 
@@ -51,27 +51,6 @@ function udesly() {
 }
 
 udesly()->run();
-
-
-add_action('plugins_loaded', function () {
-	if( ! class_exists( 'ACF' ) ) {
-		// Define path and URL to the ACF plugin.
-		define( 'MY_ACF_PATH', UDESLY_PLUGIN_DIR_PATH . '/vendor/advanced-custom-fields/' );
-		define( 'MY_ACF_URL', UDESLY_PLUGIN_URI . '/vendor/advanced-custom-fields/' );
-		// Include the ACF plugin.
-		include_once( MY_ACF_PATH . 'acf.php' );
-		// Customize the url setting to fix incorrect asset URLs.
-		add_filter( 'acf/settings/url', function( $url ) {
-			return MY_ACF_URL;
-		} );
-		// (Optional) Hide the ACF admin menu item.
-		add_filter( 'acf/settings/show_admin', function( $show_admin ) {
-			//return false;
-			return $show_admin;
-		}, 10);
-	}
-
-}, 10);
 
 
 if (is_admin()) {
