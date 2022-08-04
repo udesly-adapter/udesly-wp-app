@@ -12,8 +12,13 @@ final class FSUtils
         $tmp_file = download_url( $file_url );
          
         // Copies the file to the final destination and deletes temporary file.
-        copy( $tmp_file, $filepath );
+        if (!file_exists(dirname($filepath))) {
+            mkdir(dirname($filepath), 0755);
+        }
+        $res = copy( $tmp_file, $filepath );
         @unlink( $tmp_file );
+
+        return $res;
     }
 
     static function is_available()

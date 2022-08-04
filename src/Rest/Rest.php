@@ -2,6 +2,7 @@
 
 namespace Udesly\Rest;
 
+use Udesly\Utils\FSUtils;
 
 final class Rest extends \WP_REST_Controller {
 
@@ -55,6 +56,12 @@ final class Rest extends \WP_REST_Controller {
             'methods' => \WP_REST_Server::CREATABLE,
             'callback' => [$this, 'upload_asset'],
             "args" => [
+                "slug" => [
+                    'required' => true,
+                    'validate_callback' => function($param, $request, $key) {
+                        return is_string( $param ) && 1 !== preg_match('~[0-9]~', $param[0]);
+                    }
+                ],
                 "filename" => [
                     'required' => true,
                     'validate_callback' => function($param, $request, $key) {
@@ -85,7 +92,20 @@ final class Rest extends \WP_REST_Controller {
     }
 
     public function upload_asset(\WP_REST_Request $request) {
-        return $request->get_param('filename');
+        $filename = $request->get_param('filename');
+        $type = $request->get_param('type');
+        $asset_type = $request->get_param('asset_type');
+        $value = $request->get_param('value');
+
+        $slug = sanitize_title($request->get_param('slug'));
+        $file_path = path_join(path_join(path_join(get_theme_root(), $slug ), $asset_type), $filename);
+
+
+        switch($type) {
+            case "url":
+                return FSUtils::download_file($value, $file_path);
+        }
+
     }
 
     public function create_theme(\WP_REST_Request $request) {
