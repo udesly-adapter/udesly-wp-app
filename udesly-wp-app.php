@@ -52,6 +52,20 @@ function udesly() {
 udesly()->run();
 
 
+function udesly_cc_mime_types( $mimes ){
+	$mimes['svg'] = 'image/svg+xml';
+	return $mimes;
+}
+
+function udesly_sideload_extensions( $extensions ){
+	$extensions[] = "svg";
+	return $extensions;
+}
+
+add_filter( 'upload_mimes', 'udesly_cc_mime_types' );
+
+add_filter('image_sideload_extensions', 'udesly_sideload_extensions');
+
 if (is_admin()) {
 	require 'plugin-update-checker/plugin-update-checker.php';
 	$update_checker = Puc_v4_Factory::buildUpdateChecker(

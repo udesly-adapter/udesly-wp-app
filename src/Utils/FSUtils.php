@@ -5,6 +5,17 @@ namespace Udesly\Utils;
 final class FSUtils
 {
 
+    static function download_file( $file_url, $filepath ) {
+        if ( ! function_exists( 'download_url' ) ) {
+            require_once ABSPATH . 'wp-admin/includes/file.php';
+        }
+        $tmp_file = download_url( $file_url );
+         
+        // Copies the file to the final destination and deletes temporary file.
+        copy( $tmp_file, $filepath );
+        @unlink( $tmp_file );
+    }
+
     static function is_available()
     {
         if (!did_action('admin_init')) {
