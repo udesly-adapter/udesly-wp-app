@@ -53,6 +53,26 @@ final class Rest extends \WP_REST_Controller {
         ));
 
         register_rest_route( 'udesly/v1', '/themes/(?P<slug>[a-zA-Z0-9-]+)/assets', array(
+            'methods' => \WP_REST_Server::READABLE,
+            'callback' => [$this, 'list_assets'],
+            "args" => [
+                "slug" => [
+                    'required' => true,
+                    'validate_callback' => function($param, $request, $key) {
+                        return is_string( $param ) && 1 !== preg_match('~[0-9]~', $param[0]);
+                    }
+                ],
+                "folder" => [
+                    'required' => false,
+                    'validate_callback' => function($param, $request, $key) {
+                        return is_string( $param );
+                    }
+                ],
+            ], 
+            "permission_callback" => [$this, "is_rest_authenticated"]
+        ));
+
+        register_rest_route( 'udesly/v1', '/themes/(?P<slug>[a-zA-Z0-9-]+)/assets', array(
             'methods' => \WP_REST_Server::CREATABLE,
             'callback' => [$this, 'upload_asset'],
             "args" => [
@@ -62,22 +82,16 @@ final class Rest extends \WP_REST_Controller {
                         return is_string( $param ) && 1 !== preg_match('~[0-9]~', $param[0]);
                     }
                 ],
-                "filename" => [
+                "filepath" => [
                     'required' => true,
                     'validate_callback' => function($param, $request, $key) {
                         return is_string( $param );
                     }
                 ],
-                "asset_type" => [
-                    'required' => true,
-                    'validate_callback' => function($param, $request, $key) {
-                        return is_string( $param ) && in_array($param, ["js", "css", "images", "videos", "documents", "fonts"]);
-                    }
-                ],
                 "type" => [
                     'required' => true,
                     'validate_callback' => function($param, $request, $key) {
-                        return is_string( $param ) && in_array($param, ["url", "blob"]);
+                        return is_string( $param ) && in_array($param, ["url", "string"]);
                     }
                 ],
                 "value" => [
@@ -92,20 +106,47 @@ final class Rest extends \WP_REST_Controller {
     }
 
     public function upload_asset(\WP_REST_Request $request) {
-        $filename = $request->get_param('filename');
+        $file_path = $request->get_param('filepath');
+
+        $file_path = FSUtils::get_absolute_path($file_path);
+        
         $type = $request->get_param('type');
-        $asset_type = $request->get_param('asset_type');
         $value = $request->get_param('value');
 
         $slug = sanitize_title($request->get_param('slug'));
-        $file_path = path_join(path_join(path_join(get_theme_root(), $slug ), $asset_type), $filename);
+
+        $theme_path = path_join(get_theme_root(), $slug );
+
+        $file_path = path_join($theme_path, $file_path);
 
 
         switch($type) {
             case "url":
                 return FSUtils::download_file($value, $file_path);
+            case "string":
+                return FSUtils::write_file($value, $file_path);
         }
 
+    }
+
+    public function list_assets(\WP_REST_Request $request) {
+        $slug = sanitize_title($request->get_param('slug'));
+        $theme_path = path_join(get_theme_root(), $slug);
+
+        $folder = $request->get_param('folder');
+        if (!$folder) {
+            $folder = "";
+        }
+        $folder = FSUtils::get_absolute_path($folder);
+
+        if (!is_dir(path_join(get_theme_root(), $slug))) {
+            return [];
+        }
+        $path = path_join($theme_path, $folder);
+
+    
+        return FSUtils::scandir($path);
+        
     }
 
     public function create_theme(\WP_REST_Request $request) {
