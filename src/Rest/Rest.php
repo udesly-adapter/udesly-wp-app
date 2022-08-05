@@ -52,6 +52,20 @@ final class Rest extends \WP_REST_Controller {
             "permission_callback" => [$this, "is_rest_authenticated"]
         ));
 
+        register_rest_route( 'udesly/v1', '/themes/(?P<slug>[a-zA-Z0-9-]+)/switch', array(
+            'methods' => \WP_REST_Server::CREATABLE,
+            'callback' => [$this, 'switch_theme'],
+            "args" => [
+                "slug" => [
+                    'required' => true,
+                    'validate_callback' => function($param, $request, $key) {
+                        return is_string( $param ) && 1 !== preg_match('~[0-9]~', $param[0]);
+                    }
+                ],
+            ], 
+            "permission_callback" => [$this, "is_rest_authenticated"]
+        ));
+
         register_rest_route( 'udesly/v1', '/themes/(?P<slug>[a-zA-Z0-9-]+)/assets', array(
             'methods' => \WP_REST_Server::READABLE,
             'callback' => [$this, 'list_assets'],
@@ -105,6 +119,17 @@ final class Rest extends \WP_REST_Controller {
         ));
     }
 
+    public function switch_theme(\WP_REST_Request $request) {
+        $slug = sanitize_title($request->get_param('slug'));
+        $theme_path = path_join(get_theme_root(), $slug);
+
+        if (file_exists($theme_path)) {
+            switch_theme($slug);
+            return true;
+        }
+        return false;
+    }
+
     public function upload_asset(\WP_REST_Request $request) {
         $file_path = $request->get_param('filepath');
 
@@ -144,7 +169,6 @@ final class Rest extends \WP_REST_Controller {
         }
         $path = path_join($theme_path, $folder);
 
-    
         return FSUtils::scandir($path);
         
     }
