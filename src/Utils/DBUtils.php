@@ -310,7 +310,7 @@ final class DBUtils {
 	}
 
 	static function get_user_by_login_name( $login ) {
-		return get_user_by( "login", $login );
+		return get_user_by( "login", is_array($login) ? $login[0] : $login );
 	}
 
 	static function create_term_if_necessary( \stdClass $term ): ?int {
