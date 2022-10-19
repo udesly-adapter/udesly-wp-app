@@ -117,6 +117,20 @@ export default class Variations {
                         } else {
                             el.style.backgroundImage = `url("${value}")`;
                         }
+                        if (el.classList.contains('w-lightbox')) {
+                            const script = el.querySelector('script.w-json');
+                            if (script) {
+                                const oldItems = JSON.parse(script.textContent!);
+                                oldItems.items = [
+                                    {
+                                        "type": "image",
+                                        "url": value,
+                                        "caption": ""
+                                    }
+                                ];
+                                script.textContent = JSON.stringify(oldItems);
+                            }
+                        }
                         break;
                     case "Set":
                         console.log(el);
