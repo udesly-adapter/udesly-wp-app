@@ -44,13 +44,13 @@ export default class Variations {
 
         this.variationElements.forEach( el => {
             if (el.dataset.variationPropType == "Set") {
-                const item = el.querySelector('[data-repeater-prop="item"]');
+                const item = el.querySelector('[data-repeater-prop="item"], .w-dyn-item');
                 if (item) {
                     el.__item = item.cloneNode(true);
                     el.__item.classList.remove('udesly-hidden');
                     item.remove();
                 }
-
+                console.log(item);
             }
         })
     }
@@ -119,6 +119,7 @@ export default class Variations {
                         }
                         break;
                     case "Set":
+                        console.log(el);
                         if(!el.__item) {
                             return;
                         }
