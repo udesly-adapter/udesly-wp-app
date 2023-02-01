@@ -18,6 +18,6 @@ export function triggerWebflowInteractions() {
         Webflow.require('ix2').destroy();
         Webflow.require('ix2').init();
         document.dispatchEvent(new Event('readystatechange'));
-        document.dispatchEvent(new Event('scroll'));
+        window.dispatchEvent(new Event('scroll'));
     }
 }
