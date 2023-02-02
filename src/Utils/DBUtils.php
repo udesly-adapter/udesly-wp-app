@@ -206,6 +206,9 @@ final class DBUtils {
 	}
 
 	static function upload_from_url( $image_url, $add_to_media = true ) {
+		if (!$image_url) {
+			return false;
+		}
 		$remote_image = fopen( $image_url, 'r' );
 
 		if ( ! $remote_image ) {
