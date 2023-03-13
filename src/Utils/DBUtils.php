@@ -222,7 +222,7 @@ final class DBUtils {
 
 		if ( $meta && ! empty( $meta['wrapper_data'] ) ) {
 			foreach ( $meta['wrapper_data'] as $v ) {
-				if ( preg_match( '/Content\-Type: ?((image)\/?(jpe?g|png|gif|bmp))/i', $v, $matches ) ) {
+				if ( preg_match( '/Content\-Type: ?((image)\/?(jpe?g|png|gif|bmp|webp|svg))/i', $v, $matches ) ) {
 					$image_meta     = $matches[1];
 					$image_filetype = $matches[3];
 				}
