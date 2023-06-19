@@ -71,7 +71,7 @@ add_action('plugins_loaded', function () {
 		}, 10);
 	}
 
-}, 10);
+}, 100);
 
 
 if (is_admin()) {
