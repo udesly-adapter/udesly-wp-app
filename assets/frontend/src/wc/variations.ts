@@ -140,9 +140,9 @@ export default class Variations {
                         const items = el.querySelector('.w-dyn-items');
                         items.innerHTML = "";
                         if (!value.length) {
-                            el.querySelector('.w-dyn-empty').classList.remove('udesly-hidden');
+                            el.querySelector('.w-dyn-empty')?.classList.remove('udesly-hidden');
                         } else {
-                            el.querySelector('.w-dyn-empty').classList.add('udesly-hidden');
+                            el.querySelector('.w-dyn-empty')?.classList.add('udesly-hidden');
 
                             for (let image of value) {
                                 const item = el.__item.cloneNode(true);
