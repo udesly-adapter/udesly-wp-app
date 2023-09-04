@@ -3,7 +3,7 @@
  * Plugin Name: Udesly App
  * Plugin URI: https://udesly.com
  * Description: A companion app for the Udesly App
- * Version: 3.0.0@beta44
+ * Version: 3.0.0@beta45
  * Author: Udesly
  * Author URI: https://udesly.com
  * Text Domain: udesly

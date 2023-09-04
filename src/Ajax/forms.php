@@ -58,7 +58,7 @@ function udesly_ajax_contact() {
 
 function __udesly_save_form_data($form_data) {
 
-    $post_content = json_encode($form_data);
+    $post_content = maybe_serialize($form_data);
     switch (true) {
         case isset($form_data['email']):
             $post_title = __("New request from") . " " . $form_data['email'];
@@ -150,7 +150,14 @@ function udesly_contact_forms_init() {
 		        'Form data',
 		        function () {
 		            global $post;
-			        $data = json_decode($post->post_content);
+					
+					if (is_serialized($post->post_content)) {
+						$data = maybe_unserialize($post->post_content);
+					} else {
+						$data = json_decode($post->post_content);
+					}
+					
+			        
 
 			        echo "<ul>";
 			        foreach ($data as $key => $value) {
