@@ -17,7 +17,9 @@ export default class MiniCart {
 
     constructor(private udesly: Udesly<WooCommerceRootModel>, private wrapper: HTMLElement) {
 
-       const template = wrapper.querySelector('script[type="text/x-wf-template"]').textContent;
+       let template = wrapper.querySelector('script[type="text/x-wf-template"]').textContent!;
+
+       template = template.replace(/product\.fullSlug/gm, 'url')
 
        this.templateFunction = Eta.compile(template);
 
