@@ -101,16 +101,22 @@ export default class Checkout {
         if(!wrapper) {
             return;
         }
-        const template = wrapper.querySelector('script[type="text/x-wf-template"]').textContent;
-
-        this.templateFunction = Eta.compile(template);
+        try {
+            let template = wrapper.querySelector('script[type="text/x-wf-template"]').textContent!;
+            template = template.replace(/product\.fullSlug/gm, 'url');
+    
+            this.templateFunction = Eta.compile(template);
+            
+            this.itemsList = wrapper.querySelector('.w-commerce-commercecheckoutorderitemslist');
+    
+            this.udesly.on("woocommerce/cartChanged", () => {
+                this.refreshItemsInOrder()
+            });
+            this.refreshItemsInOrder();
+        } catch(e) {
+            console.error(e);
+        }
         
-        this.itemsList = wrapper.querySelector('.w-commerce-commercecheckoutorderitemslist');
-
-        this.udesly.on("woocommerce/cartChanged", () => {
-            this.refreshItemsInOrder()
-        });
-        this.refreshItemsInOrder();
     }
 
     refreshItemsInOrder() {
