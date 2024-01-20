@@ -571,120 +571,161 @@ function udesly_wc_order_pay( $order_id ) {
 	$order_id = absint( $order_id );
 
 	// Pay for existing order.
-	if ( isset( $_GET['pay_for_order'], $_GET['key'] ) && $order_id ) { // WPCS: input var ok, CSRF ok.
-		try {
-			$order_key = isset( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : ''; // WPCS: input var ok, CSRF ok.
-			$order     = wc_get_order( $order_id );
+	if (isset($_GET['pay_for_order'], $_GET['key']) && $order_id) { // WPCS: input var ok, CSRF ok.
 
-			// Order or payment link is invalid.
-			if ( ! $order || $order->get_id() !== $order_id || ! hash_equals( $order->get_order_key(), $order_key ) ) {
-				throw new Exception( __( 'Sorry, this order is invalid and cannot be paid for.', 'woocommerce' ) );
-			}
+		// Woocommerce Subscriptions Plugin is active and change payment method for existing subscription
+		if (is_plugin_active( 'woocommerce-subscriptions/woocommerce-subscriptions.php') && isset($_GET['change_payment_method'])) {
+			$subscription  = wcs_get_subscription(absint($_GET['change_payment_method']));
+			$valid_request = validate_change_payment_request($subscription);
 
-			// Logged out customer does not have permission to pay for this order.
-			if ( ! current_user_can( 'pay_for_order', $order_id ) && ! is_user_logged_in() ) {
-				echo '<div class="woocommerce-info">' . esc_html__( 'Please log in to your account below to continue to the payment form.', 'woocommerce' ) . '</div>';
-				woocommerce_login_form(
-					array(
-						'redirect' => $order->get_checkout_payment_url(),
-					)
-				);
+			// WC display notices on this hook so trigger it after all notices have been added,
+			do_action('before_woocommerce_pay');
+
+			if ($valid_request) {
+				if ($subscription->get_time('next_payment') > 0) {
+					// translators: placeholder is next payment's date
+					$next_payment_string = sprintf(__(' Next payment is due %s.', 'woocommerce-subscriptions'), $subscription->get_date_to_display('next_payment'));
+				} else {
+					$next_payment_string = '';
+				}
+
+				// translators: placeholder is either empty or "Next payment is due..."
+				wc_print_notice(apply_filters('woocommerce_subscriptions_change_payment_method_page_notice_message', sprintf(__('Choose a new payment method.%s', 'woocommerce-subscriptions'), $next_payment_string), $subscription), 'notice');
+
+				// Set the customer location to subscription billing location
+				foreach (array('country', 'state', 'postcode') as $address_property) {
+					$subscription_address = $subscription->{"get_billing_$address_property"}();
+
+					if ($subscription_address) {
+						WC()->customer->{"set_billing_$address_property"}($subscription_address);
+					}
+				}
+
+				wc_get_template('checkout/form-change-payment-method.php', array('subscription' => $subscription), '', WC_Subscriptions_Core_Plugin::instance()->get_subscriptions_core_directory('templates/'));
 				return;
 			}
+			if (false === $valid_request) {
+				echo '<div class="woocommerce-error">
+				<p>' .
+					esc_html__("An error occurred updating your subscription's payment method. Please contact us for assistance.", 'woocommerce-subscriptions') . '</p>
+			</div>';
+				wc_print_notices();
+				return;
+			}
+		} else {
+			try {
+				$order_key = isset($_GET['key']) ? wc_clean(wp_unslash($_GET['key'])) : ''; // WPCS: input var ok, CSRF ok.
+				$order     = wc_get_order($order_id);
 
-			// Add notice if logged in customer is trying to pay for guest order.
-			if ( ! $order->get_user_id() && is_user_logged_in() ) {
-				// If order has does not have same billing email then current logged in user then show warning.
-				if ( $order->get_billing_email() !== wp_get_current_user()->user_email ) {
-					wc_print_notice( __( 'You are paying for a guest order. Please continue with payment only if you recognize this order.', 'woocommerce' ), 'error' );
+				// Order or payment link is invalid.
+				if (!$order || $order->get_id() !== $order_id || !hash_equals($order->get_order_key(), $order_key)) {
+					throw new Exception(__('Sorry, this order is invalid and cannot be paid for.', 'woocommerce'));
 				}
-			}
 
-			// Logged in customer trying to pay for someone else's order.
-			if ( ! current_user_can( 'pay_for_order', $order_id ) ) {
-				throw new Exception( __( 'This order cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ) );
-			}
+				// Logged out customer does not have permission to pay for this order.
+				if (!current_user_can('pay_for_order', $order_id) && !is_user_logged_in()) {
+					echo '<div class="woocommerce-info">' . esc_html__('Please log in to your account below to continue to the payment form.', 'woocommerce') . '</div>';
+					woocommerce_login_form(
+						array(
+							'redirect' => $order->get_checkout_payment_url(),
+						)
+					);
+					return;
+				}
 
-			// Does not need payment.
-			if ( ! $order->needs_payment() ) {
-				/* translators: %s: order status */
-				throw new Exception( sprintf( __( 'This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. Please contact us if you need assistance.', 'woocommerce' ), wc_get_order_status_name( $order->get_status() ) ) );
-			}
-
-			// Ensure order items are still stocked if paying for a failed order. Pending orders do not need this check because stock is held.
-			if ( ! $order->has_status( wc_get_is_pending_statuses() ) ) {
-				$quantities = array();
-
-				foreach ( $order->get_items() as $item_key => $item ) {
-					if ( $item && is_callable( array( $item, 'get_product' ) ) ) {
-						$product = $item->get_product();
-
-						if ( ! $product ) {
-							continue;
-						}
-
-						$quantities[ $product->get_stock_managed_by_id() ] = isset( $quantities[ $product->get_stock_managed_by_id() ] ) ? $quantities[ $product->get_stock_managed_by_id() ] + $item->get_quantity() : $item->get_quantity();
+				// Add notice if logged in customer is trying to pay for guest order.
+				if (!$order->get_user_id() && is_user_logged_in()) {
+					// If order has does not have same billing email then current logged in user then show warning.
+					if ($order->get_billing_email() !== wp_get_current_user()->user_email) {
+						wc_print_notice(__('You are paying for a guest order. Please continue with payment only if you recognize this order.', 'woocommerce'), 'error');
 					}
 				}
 
-				foreach ( $order->get_items() as $item_key => $item ) {
-					if ( $item && is_callable( array( $item, 'get_product' ) ) ) {
-						$product = $item->get_product();
+				// Logged in customer trying to pay for someone else's order.
+				if (!current_user_can('pay_for_order', $order_id)) {
+					throw new Exception(__('This order cannot be paid for. Please contact us if you need assistance.', 'woocommerce'));
+				}
 
-						if ( ! $product ) {
-							continue;
+				// Does not need payment.
+				if (!$order->needs_payment()) {
+					/* translators: %s: order status */
+					throw new Exception(sprintf(__('This order&rsquo;s status is &ldquo;%s&rdquo;&mdash;it cannot be paid for. Please contact us if you need assistance.', 'woocommerce'), wc_get_order_status_name($order->get_status())));
+				}
+
+				// Ensure order items are still stocked if paying for a failed order. Pending orders do not need this check because stock is held.
+				if (!$order->has_status(wc_get_is_pending_statuses())) {
+					$quantities = array();
+
+					foreach ($order->get_items() as $item_key => $item) {
+						if ($item && is_callable(array($item, 'get_product'))) {
+							$product = $item->get_product();
+
+							if (!$product) {
+								continue;
+							}
+
+							$quantities[$product->get_stock_managed_by_id()] = isset($quantities[$product->get_stock_managed_by_id()]) ? $quantities[$product->get_stock_managed_by_id()] + $item->get_quantity() : $item->get_quantity();
 						}
+					}
 
-						if ( ! apply_filters( 'woocommerce_pay_order_product_in_stock', $product->is_in_stock(), $product, $order ) ) {
-							/* translators: %s: product name */
-							throw new Exception( sprintf( __( 'Sorry, "%s" is no longer in stock so this order cannot be paid for. We apologize for any inconvenience caused.', 'woocommerce' ), $product->get_name() ) );
-						}
+					foreach ($order->get_items() as $item_key => $item) {
+						if ($item && is_callable(array($item, 'get_product'))) {
+							$product = $item->get_product();
 
-						// We only need to check products managing stock, with a limited stock qty.
-						if ( ! $product->managing_stock() || $product->backorders_allowed() ) {
-							continue;
-						}
+							if (!$product) {
+								continue;
+							}
 
-						// Check stock based on all items in the cart and consider any held stock within pending orders.
-						$held_stock     = wc_get_held_stock_quantity( $product, $order->get_id() );
-						$required_stock = $quantities[ $product->get_stock_managed_by_id() ];
+							if (!apply_filters('woocommerce_pay_order_product_in_stock', $product->is_in_stock(), $product, $order)) {
+								/* translators: %s: product name */
+								throw new Exception(sprintf(__('Sorry, "%s" is no longer in stock so this order cannot be paid for. We apologize for any inconvenience caused.', 'woocommerce'), $product->get_name()));
+							}
 
-						if ( ! apply_filters( 'woocommerce_pay_order_product_has_enough_stock', ( $product->get_stock_quantity() >= ( $held_stock + $required_stock ) ), $product, $order ) ) {
-							/* translators: 1: product name 2: quantity in stock */
-							throw new Exception( sprintf( __( 'Sorry, we do not have enough "%1$s" in stock to fulfill your order (%2$s available). We apologize for any inconvenience caused.', 'woocommerce' ), $product->get_name(), wc_format_stock_quantity_for_display( $product->get_stock_quantity() - $held_stock, $product ) ) );
+							// We only need to check products managing stock, with a limited stock qty.
+							if (!$product->managing_stock() || $product->backorders_allowed()) {
+								continue;
+							}
+
+							// Check stock based on all items in the cart and consider any held stock within pending orders.
+							$held_stock     = wc_get_held_stock_quantity($product, $order->get_id());
+							$required_stock = $quantities[$product->get_stock_managed_by_id()];
+
+							if (!apply_filters('woocommerce_pay_order_product_has_enough_stock', ($product->get_stock_quantity() >= ($held_stock + $required_stock)), $product, $order)) {
+								/* translators: 1: product name 2: quantity in stock */
+								throw new Exception(sprintf(__('Sorry, we do not have enough "%1$s" in stock to fulfill your order (%2$s available). We apologize for any inconvenience caused.', 'woocommerce'), $product->get_name(), wc_format_stock_quantity_for_display($product->get_stock_quantity() - $held_stock, $product)));
+							}
 						}
 					}
 				}
+
+				WC()->customer->set_props(
+					array(
+						'billing_country'  => $order->get_billing_country() ? $order->get_billing_country() : null,
+						'billing_state'    => $order->get_billing_state() ? $order->get_billing_state() : null,
+						'billing_postcode' => $order->get_billing_postcode() ? $order->get_billing_postcode() : null,
+					)
+				);
+				WC()->customer->save();
+
+				$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
+
+				if (count($available_gateways)) {
+					current($available_gateways)->set_current();
+				}
+
+				wc_get_template(
+					'checkout/form-pay.php',
+					array(
+						'order'              => $order,
+						'available_gateways' => $available_gateways,
+						'order_button_text'  => apply_filters('woocommerce_pay_order_button_text', __('Pay for order', 'woocommerce')),
+					)
+				);
+			} catch (Exception $e) {
+				wc_print_notice($e->getMessage(), 'error');
 			}
-
-			WC()->customer->set_props(
-				array(
-					'billing_country'  => $order->get_billing_country() ? $order->get_billing_country() : null,
-					'billing_state'    => $order->get_billing_state() ? $order->get_billing_state() : null,
-					'billing_postcode' => $order->get_billing_postcode() ? $order->get_billing_postcode() : null,
-				)
-			);
-			WC()->customer->save();
-
-			$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
-
-			if ( count( $available_gateways ) ) {
-				current( $available_gateways )->set_current();
-			}
-
-			wc_get_template(
-				'checkout/form-pay.php',
-				array(
-					'order'              => $order,
-					'available_gateways' => $available_gateways,
-					'order_button_text'  => apply_filters( 'woocommerce_pay_order_button_text', __( 'Pay for order', 'woocommerce' ) ),
-				)
-			);
-
-		} catch ( Exception $e ) {
-			wc_print_notice( $e->getMessage(), 'error' );
 		}
-	} elseif ( $order_id ) {
+	} elseif ($order_id) {
 
 		// Pay for order after checkout step.
 		$order_key = isset( $_GET['key'] ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : ''; // WPCS: input var ok, CSRF ok.
@@ -936,3 +977,35 @@ function udesly_wc_price($slug, $type = "price") {
     echo "";
 }
 
+/**
+ * Validates the request to change a subscription's payment method.
+ *
+ * Will display a customer facing notice if the request is invalid.
+ *
+ * @since 3.0.0
+ *
+ * @param WC_Subscription $subscription
+ * @return bool Whether the request is valid or not.
+ */
+function validate_change_payment_request($subscription) {
+	$is_valid = true;
+
+	if (wp_verify_nonce($_GET['_wpnonce']) === false) {
+		$is_valid = false;
+		wc_add_notice(__('There was an error with your request. Please try again.', 'woocommerce-subscriptions'), 'error');
+	} elseif (empty($subscription)) {
+		$is_valid = false;
+		wc_add_notice(__('Invalid Subscription.', 'woocommerce-subscriptions'), 'error');
+	} elseif (!current_user_can('edit_shop_subscription_payment_method', $subscription->get_id())) {
+		$is_valid = false;
+		wc_add_notice(__('That doesn\'t appear to be one of your subscriptions.', 'woocommerce-subscriptions'), 'error');
+	} elseif (!$subscription->can_be_updated_to('new-payment-method')) {
+		$is_valid = false;
+		wc_add_notice(__('The payment method can not be changed for that subscription.', 'woocommerce-subscriptions'), 'error');
+	} elseif ($subscription->get_order_key() !== $_GET['key']) {
+		$is_valid = false;
+		wc_add_notice(__('Invalid order.', 'woocommerce-subscriptions'), 'error');
+	}
+
+	return $is_valid;
+}
