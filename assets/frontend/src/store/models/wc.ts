@@ -32,6 +32,9 @@ export const woocommerce = createModel<WooCommerceRootModel>()({
         removedFromCart(state, payload) {
             triggerJQuery('removed_from_cart', [ payload.fragments, payload.cart_hash ]);
             triggerJQuery('update_checkout');
+            triggerJQuery('wc_fragments_refresh');
+
+
             return state;
         },
         ajaxError(state, payload) {
@@ -41,6 +44,8 @@ export const woocommerce = createModel<WooCommerceRootModel>()({
         addedToCart(state, payload) {
             triggerJQuery('added_to_cart', [ payload.fragments, payload.cart_hash ]);
             triggerJQuery('update_checkout');
+            
+            triggerJQuery('wc_fragments_refresh');
             return state;
         },
         appliedCoupon(state, payload) {

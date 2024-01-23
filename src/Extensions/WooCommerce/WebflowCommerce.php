@@ -42,9 +42,19 @@ class WebflowCommerce {
 		$variant = udesly_get_wc_product_default_variant();
 	}
 
+	public function enqueue_styles() {
+		if ( ! wp_script_is( 'wc-cart-fragments', 'enqueued' ) && wp_script_is( 'wc-cart-fragments', 'registered' ) ) {
+			// Enqueue the 'wc-cart-fragments' script
+			wp_enqueue_script( 'wc-cart-fragments' );
+		}
+	}
+
 	private function public_hooks() {
 		$this->include_deps();
 		add_action('the_post', [$this, "include_global_variant"], 99, 2);
+
+		add_action('wp_enqueue_scripts', [$this, "enqueue_styles"], 99);
+
 
 		add_action('wp_footer', [$this, "include_mini_cart_fragments"]);
 

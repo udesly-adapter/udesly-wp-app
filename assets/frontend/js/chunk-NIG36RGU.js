@@ -1,0 +1,1 @@
+function o(e,t=null){setTimeout(()=>{jQuery(document.body).trigger(e,t)},1)}function r(e,t,n=document.body){jQuery(n).on(e,t)}function i(){let e=window.Webflow;e&&e.require("ix2")&&(e.require("ix2").destroy(),e.require("ix2").init(),document.dispatchEvent(new Event("readystatechange")),window.dispatchEvent(new Event("scroll")))}export{o as a,r as b,i as c};
