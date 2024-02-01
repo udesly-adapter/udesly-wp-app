@@ -26,7 +26,13 @@ function udesly_ajax_contact() {
 
 	foreach ($_POST['contact'] as $key => $value) {
 	    $key = sanitize_key($key);
-	    $value = sanitize_textarea_field($value);
+		if(is_array($value)) {
+			$value = array_filter($value);
+            $value = sanitize_textarea_field(join($value, ","));
+		} else {
+			$value = sanitize_textarea_field($value);
+		}
+	    
 	    $form_data[$key] = $value;
 
 	    $message .= ucfirst($key) . ": " . $value . "\r\n";

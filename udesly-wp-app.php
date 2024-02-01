@@ -3,7 +3,7 @@
  * Plugin Name: Udesly App
  * Plugin URI: https://udesly.com
  * Description: A companion app for the Udesly App
- * Version: 3.0.0@beta48
+ * Version: 3.0.0@beta49
  * Author: Udesly
  * Author URI: https://udesly.com
  * Text Domain: udesly
@@ -23,7 +23,7 @@ include_once __DIR__ . '/misc/index.php';
 
 define( 'UDESLY_PLUGIN_DIR_PATH', __DIR__ );
 
-define( 'UDESLY_PLUGIN_VERSION', "3.0.0@beta48" );
+define( 'UDESLY_PLUGIN_VERSION', "3.0.0@beta49" );
 
 define( 'UDESLY_PLUGIN_URI', plugin_dir_url( __FILE__ ) );
 
@@ -82,3 +82,14 @@ if (is_admin()) {
 		'udesly-wp-app'
 	);
 }
+
+
+add_action('wp_footer', function() {
+	?>
+<script>
+	document.querySelectorAll('form[data-ajax-action="contact"] select[multiple]').forEach( select => {
+		select.name = select.name + "[]";
+	})
+</script>
+	<?php
+});

@@ -51,26 +51,15 @@ export const wordpress = createModel<RootModel>()({
                 parent.onFormError && parent.onFormError("Anti Spam check failed!");
                 return;
             }
-function serialize (data) {
-	let obj = {};
-	for (let [key, value] of data) {
-		if (obj[key] !== undefined) {
-			if (!Array.isArray(obj[key])) {
-				obj[key] = [obj[key]];
-			}
-			obj[key].push(value);
-		} else {
-			obj[key] = value;
-		}
-	}
-	return obj;
-}
-            const dataToSend = (data)
+
+            const dataToSend = Object.fromEntries(new URLSearchParams(data).entries())
+
+            
 
             try {
                 const res = await fetch(window.udesly_frontend_options.wp.ajax_url, {
                     method: "POST",
-                    body: JSON.stringify(dataToSend),
+                    body: data,
                     redirect: "manual"
                 });
                 if (res.type == "opaqueredirect") {
