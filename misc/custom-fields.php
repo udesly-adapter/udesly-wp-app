@@ -261,6 +261,16 @@ if (!function_exists( '__udesly_prepare_field')) {
 		switch ($field_type) {
 			case "image":
 			case "ImageRef":
+				if ( ! $field_value ) {
+					return (object) [
+						"id" => "",
+						"src"    => "",
+						"alt"    => "",
+						"srcset" => "",
+						"sizes"  => "",
+						"caption" => ""
+					];
+				}
 				return udesly_get_image([
 					"id" => $field_value
 				]);
